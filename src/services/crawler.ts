@@ -2,12 +2,14 @@ import { chromium } from "playwright";
 import { ICrawler } from "../types/crawler";
 import { IMemory } from "../types/memory";
 import { IAiService } from "../types/ai";
+import { ISelector } from "../types/selector";
 
 export class Crawler implements ICrawler {
   constructor(
     private aiService: IAiService,
     private maxDepth: number = 5,
-    private memory: IMemory
+    private memory: IMemory,
+    private selectorService: ISelector
   ) {}
 
   async visitPage(url: string) {
@@ -18,7 +20,8 @@ export class Crawler implements ICrawler {
       await page.goto(url, { waitUntil: "domcontentloaded" });
 
       // Extract relevant data based on the task description
-      const extractedText = await page.evaluate(() => document.body.innerText);
+      const extractedContent =
+        await this.selectorService.getInteractableElements(page);
 
       // Find new links to follow
       const links = await page.evaluate(() =>
@@ -27,7 +30,7 @@ export class Crawler implements ICrawler {
           .filter((href) => href.startsWith("http"))
       );
 
-      return { extractedText, links };
+      return { extracted: JSON.stringify(extractedContent), links };
     } finally {
       await browser.close();
     }
@@ -55,23 +58,26 @@ export class Crawler implements ICrawler {
         const { url, depth } = link;
 
         // extract text from url and links
-        const { extractedText, links } = await this.visitPage(link.url);
+        const { extracted, links } = await this.visitPage(link.url);
+        this.memory.addTaskContext(url, extracted);
 
-        // add to task context
-        this.memory.addTaskContext(url, extractedText);
+        const { isRelevant, isSufficient, selectors } =
+          await this.aiService.hasSufficientDataForTask(
+            highLevelTaskDescription,
+            this.memory.getTaskContext()
+          );
+        // add to task context if its relevant
+        // cleanup extra content with ai filterred needed content of selectors, text.
+        if (isRelevant) {
+          this.memory.addTaskContext(url, JSON.stringify(selectors));
+        }
 
         if (this.memory.isLinkHasBeenVisited(url) || depth > this.maxDepth)
           continue;
 
         this.memory.addUrlToVisted(url);
 
-        // if a.i reply true, we break and generate task, then execute.
-        if (
-          await this.aiService.hasSufficientDataForTask(
-            highLevelTaskDescription,
-            this.memory.getTaskContext()
-          )
-        ) {
+        if (isSufficient) {
           break;
         }
 

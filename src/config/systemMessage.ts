@@ -49,6 +49,8 @@ You are WebPilot's Navigation Expert. Analyze the task description and compare i
 
 Output:
 - return isSufficient true or false.
+- return isRelevant true or false.
+- your selected selectors from the page 
 
 Note: 
    when you return false, the crawler will return more site map and text.

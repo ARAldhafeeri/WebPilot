@@ -4,5 +4,5 @@ type Urls = string[];
 
 export interface ICrawler {
   crawlWebsite(urls: Urls, highLevelTaskDescription: string): Promise<void>;
-  visitPage(url: string): Promise<{ extractedText: string; links: Urls }>;
+  visitPage(url: string): Promise<{ extracted: string; links: Urls }>;
 }

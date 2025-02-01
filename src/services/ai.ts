@@ -39,7 +39,7 @@ export class AIService implements IAiService {
   async hasSufficientDataForTask(
     highLevelTaskDescription: string,
     taskContext: string
-  ): Promise<Boolean> {
+  ) {
     if (this.model === null) throw new Error("Model is not defined!");
 
     const messages = [
@@ -53,7 +53,7 @@ export class AIService implements IAiService {
     const res = await CrawlSufficientResponseParser.parse(
       raw.content as string
     );
-    return res.isSufficient;
+    return res;
   }
 
   async generateTasksAndActions(

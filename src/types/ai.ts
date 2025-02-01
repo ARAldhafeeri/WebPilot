@@ -1,6 +1,7 @@
 import { Page } from "playwright";
 import { Task } from "../schemas/task";
 import { ActionStep } from "../schemas/action";
+import { CrawlSufficient } from "../schemas/crawl";
 
 export type Links = string[];
 export type Visited = Set<string>;
@@ -12,7 +13,7 @@ export interface IAiService {
   hasSufficientDataForTask(
     highLevelTaskDescription: string,
     taskContext: string
-  ): Promise<Boolean>; // SMART_CRAWLER_SYSTEM_MESSAGE
+  ): Promise<CrawlSufficient>; // SMART_CRAWLER_SYSTEM_MESSAGE
 
   generateTasksAndActions(
     highLevelTaskDescription: string,
