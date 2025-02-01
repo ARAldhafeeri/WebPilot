@@ -13,4 +13,5 @@ export interface IMemory {
   getVisted(): Set<string>;
   getUrlContext(url: string): string;
   addTaskContext(url: string, text: string): void;
+  purge(): void;
 }

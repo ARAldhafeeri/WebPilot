@@ -1,6 +1,7 @@
 import { ActionStep } from "../schemas/action";
 import { Page } from "playwright";
 import { IExecutor } from "../types/executor";
+import { webPilotInfo } from "../config/communicator";
 
 class Executor implements IExecutor {
   async executeActionSteps(steps: ActionStep[], page: Page) {
@@ -38,6 +39,10 @@ class Executor implements IExecutor {
         }
       }
     }
+
+    webPilotInfo(
+      `I am done executing steps inside the browser for the following page : ${page.url}`
+    );
   }
 }
 

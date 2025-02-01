@@ -3,6 +3,7 @@ import { ICrawler } from "../types/crawler";
 import { IMemory } from "../types/memory";
 import { IAiService } from "../types/ai";
 import { ISelector } from "../types/selector";
+import { webPilotInfo } from "../config/communicator";
 
 export class Crawler implements ICrawler {
   constructor(
@@ -52,6 +53,8 @@ export class Crawler implements ICrawler {
       while (this.memory.lengthOfLinksQueue() > 0) {
         // get current link in queue
         const link = this.memory.popFromLinksQueue();
+
+        webPilotInfo(`I crawling the following url ${link}`);
 
         if (!link) break;
 

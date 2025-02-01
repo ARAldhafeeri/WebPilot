@@ -1,3 +1,4 @@
+import { webPilotInfo } from "../config/communicator";
 import { INTERACTABLE_ELEMENTS } from "../config/selector";
 import { ISelector } from "../types/selector";
 import { Page } from "playwright";
@@ -18,6 +19,9 @@ class Selector implements ISelector {
         tagName: element.tagName.toLowerCase(),
       };
     });
+    webPilotInfo(
+      `I am done crawling the page for selectors I need : ${page.url}`
+    );
     return Promise.all(elementDescriptions);
   }
 

@@ -44,4 +44,11 @@ export class Memory implements IMemory {
   getUrlContext(url: string): string {
     return this.taskContext.get(url) || "";
   }
+
+  purge(): void {
+    // release resources
+    this.taskContext.clear();
+    this.linksQueue = [];
+    this.visited.clear();
+  }
 }

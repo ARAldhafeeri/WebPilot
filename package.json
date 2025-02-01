@@ -27,6 +27,7 @@
     "@langchain/deepseek": "^0.0.1",
     "@langchain/openai": "^0.4.2",
     "dotenv": "^16.4.7",
+    "winston": "^3.17.0",
     "zod": "^3.24.1"
   }
 }
