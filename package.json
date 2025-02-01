@@ -1,0 +1,32 @@
+{
+  "name": "webpilot",
+  "version": "1.0.0",
+  "description": "An intelligent AI CLI tool prompt to browser automation powered by AI models (OpenAI/DeepSeek).",
+  "main": "index.js",
+  "scripts": {
+    "watch": "tsc -watch -p ./",
+    "compile": "tsc -p ./"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ARAldhafeeri/WebPilot.git"
+  },
+  "author": "Ahmed Rakan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ARAldhafeeri/WebPilot/issues"
+  },
+  "homepage": "https://github.com/ARAldhafeeri/WebPilot#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.13.0",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.37",
+    "@langchain/deepseek": "^0.0.1",
+    "@langchain/openai": "^0.4.2",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.1"
+  }
+}
