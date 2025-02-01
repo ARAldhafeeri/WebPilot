@@ -23,3 +23,15 @@ export type Task = z.infer<typeof TaskSchema>;
 
 export const TaskSchemaResponseParser =
   StructuredOutputParser.fromZodSchema(TaskSchema);
+
+// high level task
+
+export const HighLevelTaskSchema = z.object({
+  description: z.string().min(10).max(500),
+  urls: z.array(z.string().url()),
+});
+
+export type HighLevelTask = z.infer<typeof HighLevelTaskSchema>;
+
+export const HighLevelTaskSchemaParser =
+  StructuredOutputParser.fromZodSchema(HighLevelTaskSchema);

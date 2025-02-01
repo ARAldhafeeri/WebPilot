@@ -1,10 +1,19 @@
-// src/services/ai.service.ts
-import { Page } from "playwright";
-import { Task } from "../schemas/task";
-import { ActionStep } from "../schemas/action";
+import {
+  HighLevelTask,
+  HighLevelTaskSchemaParser,
+  Task,
+  TaskSchemaResponseParser,
+} from "../schemas/task";
 import { WebPilotModel } from "../types/models";
 import { IWebPilotClient } from "../types/config";
-import { Links, Visited, IAiService } from "../types/ai"; // Adjust import path
+import { IAiService } from "../types/ai"; // Adjust import path
+import { SystemMessage } from "@langchain/core/messages";
+import {
+  AUTOMATION_ORCHESTRATOR_SYSTEM_MESSAGE,
+  EXTRACT_HIGH_LEVEL_TASK_SYSTEM_MESSAGE,
+  SMART_CRAWLER_SYSTEM_MESSAGE,
+} from "../config/systemMessage";
+import { CrawlSufficientResponseParser } from "../schemas/crawl";
 
 export class AIService implements IAiService {
   // Explicit interface implementation
@@ -14,38 +23,57 @@ export class AIService implements IAiService {
     this.model = webPilotClient.getModel();
   }
 
-  async generateActions(
-    content: string,
-    objective: string
-  ): Promise<ActionStep[]> {
-    // TODO: Implement AI-driven action generation logic
-    // Example: Use model to analyze content/objective and return actionable steps
-    return [];
+  async getHighLevelTask(userPrompt: string): Promise<HighLevelTask> {
+    if (this.model === null) throw new Error("Model is not defined!");
+    const messages = [
+      new SystemMessage(EXTRACT_HIGH_LEVEL_TASK_SYSTEM_MESSAGE(userPrompt)),
+    ];
+
+    const raw = await this.model.invoke(messages);
+
+    const res = HighLevelTaskSchemaParser.parse(raw.content as string);
+
+    return res;
   }
 
-  async isContentRelevant(
-    content: string,
-    task: Task // Changed parameter to match interface
-  ): Promise<boolean> {
-    // TODO: Implement AI-powered relevance check using task.objective
-    // Example: Use model to check if content matches task objectives
-    return false;
+  async hasSufficientDataForTask(
+    highLevelTaskDescription: string,
+    taskContext: string
+  ): Promise<Boolean> {
+    if (this.model === null) throw new Error("Model is not defined!");
+
+    const messages = [
+      new SystemMessage(
+        SMART_CRAWLER_SYSTEM_MESSAGE(highLevelTaskDescription, taskContext)
+      ),
+    ];
+
+    const raw = await this.model.invoke(messages);
+
+    const res = await CrawlSufficientResponseParser.parse(
+      raw.content as string
+    );
+    return res.isSufficient;
   }
 
-  async processContent(content: string, page: Page): Promise<void> {
-    // TODO: Implement content processing logic
-    // Example: Extract structured data from content using AI model
-  }
+  async generateTasksAndActions(
+    highLevelTaskDescription: string,
+    siteMap: string
+  ): Promise<Task> {
+    if (this.model === null) throw new Error("Model is not defined!");
 
-  async prioritizeLinks(links: Links, task: Task): Promise<Links> {
-    // TODO: Implement AI-powered link prioritization
-    // Example: Rank links based on relevance to task objectives
-    return links;
-  }
+    const messages = [
+      new SystemMessage(
+        AUTOMATION_ORCHESTRATOR_SYSTEM_MESSAGE(
+          highLevelTaskDescription,
+          siteMap
+        )
+      ),
+    ];
 
-  async hasSufficientData(task: Task): Promise<Boolean> {
-    // TODO: Implement AI-driven data sufficiency check
-    // Example: Analyze collected data against task requirements
-    return false;
+    const raw = await this.model.invoke(messages);
+
+    const res = await TaskSchemaResponseParser.parse(raw.content as string);
+    return res;
   }
 }

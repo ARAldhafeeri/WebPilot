@@ -9,5 +9,8 @@ export interface IMemory {
   lengthOfLinksQueue(): number;
   isLinkHasBeenVisited(link: string): boolean;
   addUrlToVisted(url: string): void;
-  getTaskContext(): Task | null;
+  getTaskContext(): string;
+  getVisted(): Set<string>;
+  getUrlContext(url: string): string;
+  addTaskContext(url: string, text: string): void;
 }

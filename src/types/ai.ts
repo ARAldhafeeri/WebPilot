@@ -6,9 +6,16 @@ export type Links = string[];
 export type Visited = Set<string>;
 
 export interface IAiService {
-  processContent(content: string, page: Page): Promise<void>;
-  isContentRelevant(content: string, task: Task): Promise<Boolean>;
-  prioritizeLinks(links: Links, task: Task): Promise<Links>;
-  hasSufficientData(task: Task): Promise<Boolean>;
-  generateActions(content: string, objective: string): Promise<ActionStep[]>;
+  getHighLevelTask(
+    userPrompt: string
+  ): Promise<{ urls: string[]; description: string }>; // EXTRACT_HIGH_LEVEL_TASK_SYSTEM_MESSAGE
+  hasSufficientDataForTask(
+    highLevelTaskDescription: string,
+    taskContext: string
+  ): Promise<Boolean>; // SMART_CRAWLER_SYSTEM_MESSAGE
+
+  generateTasksAndActions(
+    highLevelTaskDescription: string,
+    taskContext: string
+  ): Promise<Task>; // AUTOMATION_ORCHESTRATOR_SYSTEM_MESSAGE
 }

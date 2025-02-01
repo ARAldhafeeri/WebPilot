@@ -1,11 +1,10 @@
-import { Task } from "../schemas/task";
 import { IMemory, Link, LinksQueue } from "../types/memory";
 import { Visited } from "../types/ai";
 
 export class Memory implements IMemory {
   private visited: Visited = new Set();
   private linksQueue: LinksQueue = [];
-  private currentTask: Task | null = null;
+  private taskContext: Map<string, string> = new Map();
 
   pushToLinksQueue(payload: Link): void {
     this.linksQueue.push(payload);
@@ -23,11 +22,26 @@ export class Memory implements IMemory {
     this.visited.add(url);
   }
 
+  getVisted(): Set<string> {
+    return this.visited;
+  }
+
   isLinkHasBeenVisited(link: string): boolean {
     return this.visited.has(link);
   }
 
-  getTaskContext(): Task | null {
-    return this.currentTask;
+  getTaskContext(): string {
+    return JSON.stringify(
+      this.taskContext,
+      (key, value) => `URL : ${key} - Context ${value}`
+    );
+  }
+
+  addTaskContext(url: string, text: string): void {
+    this.taskContext.set(url, text);
+  }
+
+  getUrlContext(url: string): string {
+    return this.taskContext.get(url) || "";
   }
 }

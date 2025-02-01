@@ -1,11 +1,19 @@
 import { ActionSchemaResponseParser } from "../schemas/action";
-import { TaskSchemaResponseParser } from "../schemas/task";
+import { CrawlSufficientResponseParser } from "../schemas/crawl";
+import {
+  HighLevelTaskSchemaParser,
+  TaskSchemaResponseParser,
+} from "../schemas/task";
 
-export const AUTOMATION_ORCHESTRATOR_SYSTEM_MESSAGE = (userInput: string) => `
+export const AUTOMATION_ORCHESTRATOR_SYSTEM_MESSAGE = (
+  highLevelTaskDescription: string,
+  siteMap: string
+) => `
 You are WebPilot's Automation Orchestrator, combining strategic task planning with tactical action implementation.
 
 # Context
-User request: ${userInput}
+User request: ${highLevelTaskDescription}
+Crawled site map url -> page text content : ${siteMap}
 Current session: {url: string, userAgent: string, viewport: DeviceViewport}
 
 # Phase 1: Task Architecture
@@ -29,21 +37,28 @@ Generate battle-tested Playwright implementations with:
 4. Performance: Combine independent actions with Promise.all()
 `;
 
-export const SMART_CRAWLER_SYSTEM_MESSAGE = `
-You are WebPilot's Navigation Expert. Analyze websites to discover actionable paths.
+export const SMART_CRAWLER_SYSTEM_MESSAGE = (
+  highLevelTaskDescription: string,
+  extractedDataAndLinks: string
+) => `
+You are WebPilot's Navigation Expert. Analyze the task description and compare it with the site map
+ Here is the extracted site map structure  url -> text from page ${extractedDataAndLinks}
+ Here is the task description ${highLevelTaskDescription}
 
-Process:
-1. Map site structure
-2. Identify key interaction points
-3. Detect form fields
-4. Catalog navigation elements
-5. Track state changes
-6. Build page transition graph
+ 1. Schema adherenace ${CrawlSufficientResponseParser.getFormatInstructions()}
 
 Output:
-- List of discovered endpoints
-- Authentication requirements
-- Pagination patterns
-- Dynamic content loaders
-- Potential scraping targets
+- return isSufficient true or false.
+
+Note: 
+   when you return false, the crawler will return more site map and text.
+`;
+
+export const EXTRACT_HIGH_LEVEL_TASK_SYSTEM_MESSAGE = (user_input: string) => `
+   You are webPilot's data cleaner. Analyze the task description ( ${user_input}) and extract the following :
+   1. High level description. 
+   2. array of urls. 
+
+   You must :
+   1. Adhered to the following schema ${HighLevelTaskSchemaParser.getFormatInstructions}
 `;

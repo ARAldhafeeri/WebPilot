@@ -1,5 +1,8 @@
 import { Task } from "../schemas/task";
 
+type Urls = string[];
+
 export interface ICrawler {
-  crawlWebsite(task: Task): Promise<void>;
+  crawlWebsite(urls: Urls, highLevelTaskDescription: string): Promise<void>;
+  visitPage(url: string): Promise<{ extractedText: string; links: Urls }>;
 }
