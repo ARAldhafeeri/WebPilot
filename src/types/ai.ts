@@ -3,7 +3,6 @@ import { Task } from "../schemas/task";
 import { ActionStep } from "../schemas/action";
 
 export type Links = string[];
-export type Queue = { url: string; depth: number }[];
 export type Visited = Set<string>;
 
 export interface IAiService {

@@ -4,7 +4,7 @@ import { Task } from "../schemas/task";
 import { ActionStep } from "../schemas/action";
 import { WebPilotModel } from "../types/models";
 import { IWebPilotClient } from "../types/config";
-import { Links, Queue, Visited, IAiService } from "../types/ai"; // Adjust import path
+import { Links, Visited, IAiService } from "../types/ai"; // Adjust import path
 
 export class AIService implements IAiService {
   // Explicit interface implementation

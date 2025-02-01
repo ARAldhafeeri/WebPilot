@@ -1,9 +1,13 @@
-import { ActionStep } from "../schemas/action";
 import { Task } from "../schemas/task";
 
+export type Link = { url: string; depth: number };
+export type LinksQueue = Array<Link>;
+
 export interface IMemory {
-  addLinks(links: string[], task: Task, depth: number): void;
-  getNextActionStep(): ActionStep | null;
-  recordActionResult(step: ActionStep, success: boolean): void;
+  pushToLinksQueue(payload: Link): void;
+  popFromLinksQueue(): Link | undefined;
+  lengthOfLinksQueue(): number;
+  isLinkHasBeenVisited(link: string): boolean;
+  addUrlToVisted(url: string): void;
   getTaskContext(): Task | null;
 }

@@ -1,55 +1,30 @@
-// src/types/memory.ts
-import { z } from "zod";
 import { Task } from "../schemas/task";
-import { ActionStepSchema } from "../schemas/action";
-import { IMemory } from "../types/memory";
-import { Queue, Visited } from "../types/ai";
-
-type ActionStep = z.infer<typeof ActionStepSchema>;
+import { IMemory, Link, LinksQueue } from "../types/memory";
+import { Visited } from "../types/ai";
 
 export class Memory implements IMemory {
   private visited: Visited = new Set();
-  private queue: Queue = [];
+  private linksQueue: LinksQueue = [];
   private currentTask: Task | null = null;
-  private actionHistory: ActionStep[] = [];
 
-  addLinks(links: string[], task: Task, depth: number = 0): void {
-    const baseDomain = new URL(task.currentUrl).hostname;
-
-    const filtered = links.filter((link) => {
-      try {
-        const url = new URL(link);
-        return url.hostname.includes(baseDomain) && !this.visited.has(link);
-      } catch {
-        return false;
-      }
-    });
-
-    this.queue.push(
-      ...filtered
-        .map((url) => ({ url, depth }))
-        .sort((a, b) => a.depth - b.depth)
-    );
+  pushToLinksQueue(payload: Link): void {
+    this.linksQueue.push(payload);
   }
 
-  getNextActionStep(): ActionStep | null {
-    return (
-      this.currentTask?.steps.find(
-        (step) =>
-          !this.actionHistory.some((h) => h.description === step.description)
-      ) || null
-    );
+  popFromLinksQueue(): Link | undefined {
+    return this.linksQueue.shift();
   }
 
-  recordActionResult(step: ActionStep, success: boolean): void {
-    if (success) {
-      this.actionHistory.push(ActionStepSchema.parse(step));
-    } else {
-      this.queue.unshift({
-        url: step.url || this.currentTask?.currentUrl || "",
-        depth: 0,
-      });
-    }
+  lengthOfLinksQueue(): number {
+    return this.linksQueue.length;
+  }
+
+  addUrlToVisted(url: string): void {
+    this.visited.add(url);
+  }
+
+  isLinkHasBeenVisited(link: string): boolean {
+    return this.visited.has(link);
   }
 
   getTaskContext(): Task | null {

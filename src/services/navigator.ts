@@ -1,19 +1,23 @@
 import { Task } from "../schemas/task";
-import { IAiService, Queue, Visited } from "../types/ai";
+import { IAiService } from "../types/ai";
 import { IExecutor } from "../types/executor";
+import { IMemory } from "../types/memory";
 import { INavigator } from "../types/navigator";
 import { Page } from "playwright";
+import { linkCreator } from "../utils/helpers";
 
 class Navigator implements INavigator {
-  constructor(private aiService: IAiService, private executor: IExecutor) {}
+  constructor(
+    private aiService: IAiService,
+    private executor: IExecutor,
+    private memory: IMemory
+  ) {}
 
   async navigateAndProcess(
     page: Page,
     url: string,
     task: Task,
-    depth: number,
-    queue: Queue,
-    visited: Visited
+    depth: number
   ): Promise<void> {
     try {
       await page.goto(url);
@@ -23,28 +27,22 @@ class Navigator implements INavigator {
 
       if (await this.aiService.isContentRelevant(content, task)) {
         await this.aiService.processContent(content, page);
-        await this.processPageLinks(page, task, depth, queue, visited);
+        await this.processPageLinks(page, task, depth);
       }
     } catch (error) {
       console.error(`Error processing ${url}:`, error);
     }
   }
 
-  async processPageLinks(
-    page: Page,
-    task: Task,
-    depth: number,
-    queue: { url: string; depth: number }[],
-    visited: Visited
-  ) {
+  async processPageLinks(page: Page, task: Task, depth: number) {
     const links = await this.extractValidLinks(page);
-    const prioritized = await this.aiService.prioritizeLinks(links, task);
+    let prioritized = await this.aiService.prioritizeLinks(links, task);
 
-    queue.push(
-      ...prioritized
-        .filter((link) => !visited.has(link))
-        .map((link) => ({ url: link, depth: depth + 1 }))
-    );
+    for (const link of prioritized) {
+      if (!this.memory.isLinkHasBeenVisited(link)) {
+        this.memory.pushToLinksQueue(linkCreator(link, depth + 1));
+      }
+    }
   }
 
   async extractValidLinks(page: Page): Promise<string[]> {
