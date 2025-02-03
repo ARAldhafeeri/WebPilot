@@ -1,11 +1,15 @@
+import { openBrowser } from "../functions/browser";
 import { ActionStep } from "../schemas/action";
 import { Page } from "playwright";
-import { IExecutor } from "../types/executor";
-import { webPilotInfo } from "../config/communicator";
+import { AppState } from "../graph/state";
+import { tool } from "@langchain/core/tools";
 
-class Executor implements IExecutor {
-  async executeActionSteps(steps: ActionStep[], page: Page) {
-    for (const step of steps) {
+const executeBrowserSteps = tool(
+  async (state: typeof AppState.State) => {
+    // open browser go to root page, to execute steps
+    const page = await openBrowser();
+    await page.goto(state.highLevelTask.urls[0]);
+    for (const step of state.currentTask.steps) {
       const retry = step.retryPolicy || { maxAttempts: 3, delay: 1000 };
       let attempt = 0;
 
@@ -39,11 +43,9 @@ class Executor implements IExecutor {
         }
       }
     }
-
-    webPilotInfo(
-      `I am done executing steps inside the browser for the following page : ${page.url}`
-    );
+  },
+  {
+    name: "browser_executor",
+    description: "execute browser tasks",
   }
-}
-
-export default Executor;
+);

@@ -16,6 +16,12 @@ An intelligent AI CLI tool prompt to browser automation powered by AI models (Op
 - Node.js v20+
 - AI API key (OpenAI or DeepSeek)
 
+## Supported platforms
+
+- OpenAI
+- Deepseek ( coming soon)
+- Ollama ( coming soon )
+
 ## Installation
 
 ```bash
