@@ -1,13 +1,15 @@
 import { llm } from "../config";
 import { TaskSchemaResponseParser } from "../schemas/task";
+import { executorTool } from "../tools/executor";
 
 import createAgent from "../utils/agent";
 
 export const executorAgent = await createAgent({
   llm: llm,
-  tools: [], // executor tool
+  tools: [executorTool], // Executor tool
   systemMessage: `
-      you should execute all the tasks until you are done.
-      ${TaskSchemaResponseParser.getFormatInstructions()}
+    Your task is to execute all tasks listed under currentTask by calling the browser_executor tool.  
+    Follow this schema for formatting the results:  
+    ${TaskSchemaResponseParser.getFormatInstructions()}
   `,
 });

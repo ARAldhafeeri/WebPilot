@@ -37,19 +37,19 @@ export const AppState = Annotation.Root({
     default: () => ({ results: [] }),
   }),
   taskContext: Annotation<Map<string, string>>({
-    reducer: (prev, next) => next ?? prev ?? null,
+    reducer: (prev, next) => next ?? prev ?? new Map(),
     default: () => new Map(),
   }),
   linksQueue: Annotation<Array<Link>>({
-    reducer: (prev, next) => next ?? prev ?? null,
+    reducer: (prev, next) => prev.concat(next),
     default: () => [],
   }),
   visited: Annotation<Set<string>>({
-    reducer: (prev, next) => next ?? prev ?? null,
+    reducer: (prev, next) => next ?? prev ?? new Set(),
     default: () => new Set(),
   }),
   crawledFirstUrl: Annotation<Boolean>({
-    reducer: (prev, next) => next ?? prev ?? null,
+    reducer: (prev, next) => next ?? prev ?? false,
     default: () => false,
   }),
 });

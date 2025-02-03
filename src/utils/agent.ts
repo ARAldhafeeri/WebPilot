@@ -75,11 +75,9 @@ export async function runAgentNode(props: {
       }
       break;
     case AGENT_NAMES.lltasker:
-      if (!result.tool_calls || result.tool_calls.length === 0) {
-        stateUpdates.currentTask = await TaskSchemaResponseParser.parse(
-          result.content
-        );
-      }
+      stateUpdates.currentTask = await TaskSchemaResponseParser.parse(
+        result.content
+      );
       break;
     case AGENT_NAMES.crawler:
       if (!result.tool_calls || result.tool_calls.length === 0) {
@@ -94,6 +92,8 @@ export async function runAgentNode(props: {
           result.content
         );
       }
+      break;
+    case AGENT_NAMES.executor:
       break;
     default:
       break;

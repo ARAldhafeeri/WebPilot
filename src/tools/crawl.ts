@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import { selectorService } from "../services";
 import { AppState } from "../graph/state";
 import { tool } from "@langchain/core/tools";
+import { z } from "zod";
 
 async function visitPage(url: string) {
   const browser = await chromium.launch({ headless: true });
@@ -29,42 +30,34 @@ async function visitPage(url: string) {
 }
 
 export const crawlTool = tool(
-  async (state: typeof AppState.State): Promise<void> => {
+  async (state: typeof AppState.State): Promise<any> => {
     /**
      * crawl the site until the a.i has enough links, data to perform the task.
      */
+    const taskContext = new Map();
 
-    if (
-      !state.linksQueue.includes({
-        url: state.highLevelTask.urls[0],
-        depth: 1,
-      }) &&
-      !state.crawledFirstUrl
-    ) {
-      state.linksQueue.push({ url: state.highLevelTask.urls[0], depth: 1 });
-      state.crawledFirstUrl = true;
-    }
+    let { extracted, links } = await visitPage(
+      state?.highLevelTask?.urls[0] || (state as unknown as string)
+    );
 
-    const foundLinks = [];
+    let depth = 0;
     try {
-      while (state.linksQueue?.length > 0) {
+      // use only 10 url per link
+      while (depth < 10) {
         // get current link in queue
-        const link = state.linksQueue.shift();
+        const link = links.shift();
 
         if (!link) break;
-
-        const { url, depth } = link;
+        let data = await visitPage(link);
 
         // extract text from url and links
-        const { extracted, links } = await visitPage(link.url);
-        state.taskContext.set(url, extracted);
-
-        state.visited.add(url);
-        // add links if ai call this tool again.
-        links.forEach((newUrl) =>
-          foundLinks.push({ url: newUrl, depth: depth + 1 })
-        );
+        taskContext.set(link, data.extracted);
+        depth += 1;
       }
+
+      return {
+        crawlData: taskContext,
+      };
 
       // if ai calls the tool again he will use state.links from pervious page
     } catch (error) {
@@ -73,6 +66,6 @@ export const crawlTool = tool(
   },
   {
     name: "crawl_website",
-    description: "crawl website and update state for crawler agent",
+    description: "call to crawl url",
   }
 );

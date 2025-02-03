@@ -37,10 +37,22 @@ npx playwright install chromium
 2. Add your API keys:
 
 ```env
-OPENAI_API_KEY=your_key_here
-DEEPSEEK_API_KEY=your_key_here
-DEFAULT_AI_PROVIDER=openai
+API_KEY=your-api-key
+MODEL_PROVIDER=your-model-provider
+MODEL_SLUG=your-model-slug
+TAVILY_API_KEY=your-tavily-api-key
+SEARCH_RESULTS="3"
+
+# dev options
+LANGSMITH_TRACING=true
+LANGSMITH_ENDPOINT="your-lang-smith-url"
+LANGSMITH_API_KEY="your-lang-smith-api-key"
+LANGSMITH_PROJECT="your-lang-smith-project-name"
 ```
+
+dev options: are for integrating with langsmith.
+search results, control the number of search the results the Agentic AI fetches from tavily.
+the others are self explaintory.
 
 ## Usage
 

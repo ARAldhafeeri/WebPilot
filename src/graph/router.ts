@@ -14,8 +14,11 @@ export function router(state: typeof AppState.State) {
     lastMessage.content.includes("FINAL ANSWER")
   ) {
     // Any agent decided the work is done
+    console.log("Researcher decision point:", state.sender);
+
     return "end";
   }
+  console.log("Researcher decision point:", state.sender);
 
   return "continue";
 }

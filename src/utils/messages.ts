@@ -8,10 +8,11 @@ import { HighLevelTask } from "../schemas/task";
 class AgentsMessageOrchestrator {
   messageResearcher(highLevelTask: HighLevelTask) {
     return [
-      new SystemMessage({
+      {
         content: `High level task description: ${highLevelTask.description}
         Task stack: ${JSON.stringify(highLevelTask.searchTasks)}`,
-      }),
+        role: "system",
+      },
     ];
   }
 

@@ -10,6 +10,8 @@ import { searchTool } from "../tools/search";
 import { executorAgent } from "../agents/executor";
 import { AGENT_NAMES } from "../agents/names";
 import { crawlTool } from "../tools/crawl";
+import { reportAgent } from "../agents/reporter";
+import { executorTool } from "../tools/executor";
 
 // research node
 export async function researchNode(
@@ -75,8 +77,18 @@ export async function executorNode(
     config,
   });
 }
-
+export async function reportNode(
+  state: typeof AppState.State,
+  config?: RunnableConfig
+) {
+  return runAgentNode({
+    state: state,
+    agent: reportAgent,
+    name: AGENT_NAMES.reporter,
+    config,
+  });
+}
 // tool node
-const tools = [searchTool, crawlTool];
+const tools = [searchTool, crawlTool, executorTool];
 // This runs tools in the graph
 export const toolNode = new ToolNode<typeof AppState.State>(tools);

@@ -20,24 +20,11 @@ console.log(chalk.hex("#00ccff").bold("  Next-Gen Browser Automation CLI\n"));
 if (!existsSync(".env")) {
   const rl = createInterface({ input: stdin, output: stdout });
   console.log(chalk.yellow("🔧 Initial setup required 🔧"));
-
-  let envContent = "";
-
-  const requiredKeys = [
-    "API_KEY",
-    "MODEL_PROVIDER",
-    "MODEL_SLUG",
-    "TAVILY_API_KEY",
-    "SEARCH_RESULTS",
-  ];
-
-  for (const key of requiredKeys) {
-    const value = await rl.question(chalk.cyan(`Enter value for ${key}: `));
-    envContent += `${key}=${value}\n`;
-  }
-
-  writeFileSync(".env", envContent);
-  console.log(chalk.green("✅ Configuration saved!"));
+  const apiKey = await rl.question(
+    chalk.cyan("Enter your DeepSeek/OpenAI API key: ")
+  );
+  writeFileSync(".env", `AI_API_KEY=${apiKey}\n`);
+  console.log(chalk.green("✅ Configuration saved!\n"));
   rl.close();
 }
 

@@ -7,15 +7,8 @@ export const researchAgent = await createAgent({
   llm: llm,
   tools: [searchTool],
   systemMessage: `
-    The high level tasker will send search tasks
-    your task is to research and then return the results
-    adhered to the following schema : 
-    your search results must be an array of the following object
-    {
-      title: "name",
-      url: "url",
-      description: "description.
-    }
+    Your task is to conduct research strictly using the searchTool.  
+    Follow this schema for formatting the results:  
     ${SearchResultSchemaParser.getFormatInstructions()}
   `,
 });

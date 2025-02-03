@@ -4,4 +4,5 @@ export const AGENT_NAMES = {
   lltasker: "LowLevelTaskGeneratorAgent",
   researcher: "SearchAgent",
   executor: "BrowserExecutorAgent",
+  reporter: "ReporterAgent"
 };

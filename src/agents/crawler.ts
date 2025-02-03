@@ -6,9 +6,11 @@ import createAgent from "../utils/agent";
 
 export const crawlAgent = await createAgent({
   llm: llm,
-  tools: [crawlTool], // crawl tool
+  tools: [crawlTool], // Crawl tool
   systemMessage: `
-      you should call the crawled tool until the crawled content is sufficient for the task description.
-      ${CrawlSufficientResponseParser.getFormatInstructions()}
+    Your task is to retrieve content by calling the crawl_website tool.  
+    Tool name: crawl_website  
+    Follow this schema for formatting the results:  
+    ${CrawlSufficientResponseParser.getFormatInstructions()}
   `,
 });

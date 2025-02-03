@@ -5,7 +5,19 @@ import { Page } from "playwright";
 class Selector implements ISelector {
   async getInteractableElements(page: Page) {
     const elements = await page.evaluate(() =>
-      document.querySelectorAll(INTERACTABLE_ELEMENTS.join(","))
+      document.querySelectorAll(
+        [
+          "a[href]",
+          "button",
+          'input:not([type="hidden"])',
+          "select",
+          "textarea",
+          '[tabindex]:not([tabindex="-1"])',
+          '[role="button"]',
+          '[role="link"]',
+          '[contenteditable="true"]',
+        ].join(",")
+      )
     );
 
     const interactableElements = Array.from(elements);
