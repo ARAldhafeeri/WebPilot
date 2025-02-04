@@ -17,3 +17,4 @@ export const setModeFromMemoryStore = async (mode: string) => {
 export const getModeFromMemoryStore = async () => {
   return await store.get([MODE_CONTEXT], "mode");
 };
+

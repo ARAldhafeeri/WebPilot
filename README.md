@@ -1,13 +1,12 @@
 # WebPilot
 
-An intelligent AI CLI tool prompt to browser automation powered by AI models (OpenAI/DeepSeek).
+An multi-agent prompt to browser automation , research or crawling the web.
 
 ## Features
 
 - Natural language task processing
 - Smart website crawling
 - AI-driven browser automation
-- CLI interface for easy operation
 
 ## Prerequisites
 
@@ -50,35 +49,23 @@ LANGSMITH_API_KEY="your-lang-smith-api-key"
 LANGSMITH_PROJECT="your-lang-smith-project-name"
 
 
-SEARCH_RESULTS="3"
-SEARCH_DEPTH ="3"
-
-CRAWL_BASE="2"
-CRAWL_DEPTH="3"
+SEARCH_DEPTH =basic
+SEARCH_RESULTS
 ```
 
 - dev options: are for integrating with langsmith for development purposes.
 - `SEARCH_RESULTS` : Will determine the number of results per search query.
-- `SEARCH_DEPTH` : Will determine the number of research based on the result of search query, e.g. if research result is 1, dpeth is 2:
-  - A : search results 1.
-  - B: formulate query and research the search results from A.
-  - C: forumulate search query from B results and research the search results from B.
-  - Report research from A, B, C.
+- `SEARCH_DEPTH` : basic or deep
+
+Note: both crawl, and browser needs to start the prompt with "
+describe this high level task : <yourprompt>"
+other wise AI will try to execute it , when it's executed by a tool node.
 
 ## Usage
 
 ```bash
 npm run start
 ```
-
-### Basic Commands
-
-Inside the chat interface you can do three commands :
-
-1. `/exit` : exit the cli tool.
-2. `/research`: start new research chat inside any other chat.
-3. `/crawl`: start new crawl chat inside any other chat.
-4. `/browse`: start new browse chat inside any other chat.
 
 ## Contributing
 

@@ -1,40 +1,52 @@
 import { RunnableConfig } from "@langchain/core/runnables";
-import { researchAgent } from "../agents/researcher";
 import { runAgentNode } from "../utils/agent";
-import { AppState } from "./state";
-import { hlTaskerAgent } from "../agents/hltasker";
-import { llTaskerAgent } from "../agents/lltasker";
-import { crawlAgent } from "../agents/crawler";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { searchTool } from "../tools/search";
-import { executorAgent } from "../agents/executor";
-import { AGENT_NAMES } from "../agents/names";
-import { crawlTool } from "../tools/crawl";
-import { reportAgent } from "../agents/reporter";
-import { executorTool } from "../tools/executor";
+import { AppState } from "./state";
+import {
+  hlBrowserTasker,
+  hlCrawlTasker,
+  hlResearchTasker,
+} from "../agents/hltasker";
+import { llTaskerAgent } from "../agents/lltasker";
 
-// research node
-export async function researchNode(
+import { NODE_NAMES } from "../config/names";
+import { reportAgent } from "../agents/reporter";
+import { searchTool } from "../tools/search";
+import { crawlTool } from "../tools/crawl";
+import { executorTool } from "../tools/executor";
+// high level task generation nodes
+export async function hlBrowserTaskerNode(
   state: typeof AppState.State,
   config?: RunnableConfig
 ) {
   return runAgentNode({
     state: state,
-    agent: researchAgent,
-    name: AGENT_NAMES.researcher,
+    agent: hlBrowserTasker,
+    name: NODE_NAMES.hlBrowserTasker,
     config,
   });
 }
 
-// high level task generation node
-export async function highLevelTasksNode(
+export async function hlCrawlTaskerNode(
   state: typeof AppState.State,
   config?: RunnableConfig
 ) {
   return runAgentNode({
     state: state,
-    agent: hlTaskerAgent,
-    name: AGENT_NAMES.hltasker,
+    agent: hlCrawlTasker,
+    name: NODE_NAMES.hlCrawlTasker,
+    config,
+  });
+}
+
+export async function hlResearchTaskerNode(
+  state: typeof AppState.State,
+  config?: RunnableConfig
+) {
+  return runAgentNode({
+    state: state,
+    agent: hlResearchTasker,
+    name: NODE_NAMES.hlResearchTasker,
     config,
   });
 }
@@ -47,36 +59,11 @@ export async function lowLevelTasksNode(
   return runAgentNode({
     state: state,
     agent: llTaskerAgent,
-    name: AGENT_NAMES.lltasker,
+    name: NODE_NAMES.lltasker,
     config,
   });
 }
 
-// crawler node
-export async function crawlerNode(
-  state: typeof AppState.State,
-  config?: RunnableConfig
-) {
-  return runAgentNode({
-    state: state,
-    agent: crawlAgent,
-    name: AGENT_NAMES.crawler,
-    config,
-  });
-}
-
-// executor node
-export async function executorNode(
-  state: typeof AppState.State,
-  config?: RunnableConfig
-) {
-  return runAgentNode({
-    state: state,
-    agent: executorAgent,
-    name: AGENT_NAMES.executor,
-    config,
-  });
-}
 export async function reportNode(
   state: typeof AppState.State,
   config?: RunnableConfig
@@ -84,11 +71,11 @@ export async function reportNode(
   return runAgentNode({
     state: state,
     agent: reportAgent,
-    name: AGENT_NAMES.reporter,
+    name: NODE_NAMES.reporter,
     config,
   });
 }
-// tool node
-const tools = [searchTool, crawlTool, executorTool];
-// This runs tools in the graph
-export const toolNode = new ToolNode<typeof AppState.State>(tools);
+
+export const searchToolNode = new ToolNode([searchTool]);
+
+export const executeToolNode = new ToolNode([executorTool]);

@@ -1,7 +1,7 @@
 // the following file have methods that turn the JSON result
 // from each agent into a message and send it to the agent.
 import { SystemMessage } from "@langchain/core/messages";
-import { AGENT_NAMES } from "../agents/names";
+import { NODE_NAMES } from "../config/names";
 import { AppState } from "../graph/state";
 import { HighLevelTask } from "../schemas/task";
 
@@ -18,7 +18,7 @@ class AgentsMessageOrchestrator {
 
   orchestrator(state: typeof AppState.State) {
     switch (state.sender) {
-      case AGENT_NAMES.hltasker:
+      case NODE_NAMES.hltasker:
         return state.highLevelTask
           ? this.messageResearcher(state.highLevelTask)
           : [];

@@ -1,6 +1,13 @@
 import { BaseMessage } from "@langchain/core/messages";
 import { Annotation } from "@langchain/langgraph";
-import { HighLevelTask, SearchResults, Task } from "../schemas/task";
+import {
+  BrowserTask,
+  CrawlTask,
+  HighLevelTask,
+  ResearchTask,
+  SearchResults,
+  Task,
+} from "../schemas/task";
 import { CrawlSufficient } from "../schemas/crawl";
 import { Link } from "../types/memory";
 import { APP_MODES } from "../config/modes";
@@ -18,9 +25,17 @@ export const AppState = Annotation.Root({
     reducer: (prev, next) => next ?? prev ?? "user",
     default: () => "user",
   }),
-  highLevelTask: Annotation<HighLevelTask>({
+  crawlTaskDescription: Annotation<CrawlTask>({
     reducer: (prev, next) => next ?? prev ?? null,
-    default: () => ({ description: "", urls: [], searchTasks: [] }),
+    default: () => ({ depth: 0, base: 1, urls: [], description: "" }),
+  }),
+  researchTask: Annotation<ResearchTask>({
+    reducer: (prev, next) => next ?? prev ?? null,
+    default: () => ({ topic: "", keyFindings: [], references: [] }),
+  }),
+  browserTasks: Annotation<BrowserTask>({
+    reducer: (prev, next) => next ?? prev ?? null,
+    default: () => ({ objective: "", steps: [] }),
   }),
   currentTask: Annotation<Task>({
     reducer: (prev, next) => next ?? prev ?? null,
@@ -31,30 +46,16 @@ export const AppState = Annotation.Root({
       status: "pending",
     }),
   }),
-  crawlData: Annotation<CrawlSufficient | null>({
+  crawlData: Annotation<CrawlSufficient>({
     reducer: (prev, next) => next ?? prev ?? null,
-    default: () => null,
+    default: () => ({
+      pages: new Map(),
+    }),
   }),
   searchResults: Annotation<SearchResults>({
     reducer: (prev, next) => ({
       results: [...prev.results, ...next.results],
     }),
     default: () => ({ results: [] }),
-  }),
-  taskContext: Annotation<Map<string, string>>({
-    reducer: (prev, next) => next ?? prev ?? new Map(),
-    default: () => new Map(),
-  }),
-  linksQueue: Annotation<Array<Link>>({
-    reducer: (prev, next) => prev.concat(next),
-    default: () => [],
-  }),
-  visited: Annotation<Set<string>>({
-    reducer: (prev, next) => next ?? prev ?? new Set(),
-    default: () => new Set(),
-  }),
-  crawledFirstUrl: Annotation<Boolean>({
-    reducer: (prev, next) => next ?? prev ?? false,
-    default: () => false,
   }),
 });

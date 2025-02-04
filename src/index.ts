@@ -12,19 +12,28 @@ import { v4 as uuidv4 } from "uuid";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { graph } from "./graph/index";
 import { APP_MODES, setModeFromMemoryStore } from "./config/modes";
-// It is assumed that your graph module exports dedicated functions:
-//   - research(params, options)
-//   - crawl(params, options)
-//   - browse(params, options)
-// All of which should match the signature:
-//   (params: { messages: (HumanMessage | AIMessage)[]; threadId?: string; title?: string }, options?: Record<string, unknown>)
-//      => AsyncIterable<{ messages: { content: string }[] }>
+import { prettifyOutput } from "./utils/cli";
+import { crawlTool } from "./tools/crawl";
 
 dotenv.config();
 
 // ================
 // Helper Functions
 // ================
+async function getCrawlParams(
+  rl: any
+): Promise<{ depth: number; base: number; url: string }> {
+  const depth = parseInt(
+    await rl.question(chalk.cyan("Enter crawl depth (1-3): "))
+  );
+  const base = parseInt(
+    await rl.question(chalk.cyan("Enter base links per page (1-10): "))
+  );
+  const url = await rl.question(chalk.cyan("Enter starting URL: "));
+  return { depth, base, url };
+}
+
+const COMMANDS = ["/research", "/crawl", "/browse", "/exit"];
 
 /**
  * Performs the initial setup by prompting for an API key if a .env file is missing.
@@ -53,19 +62,6 @@ function displayBanner() {
   console.log(chalk.hex("#00ccff").bold("  Next-Gen Browser Automation CLI\n"));
 }
 
-/**
- * Prints text to the console using a typewriter effect.
- * @param text The text to print.
- * @param speed The delay (in ms) between characters.
- */
-async function typewriter(text: string, speed = 10) {
-  for (const char of text) {
-    process.stdout.write(chalk.hex("#00ff99")(char));
-    await new Promise((resolve) => setTimeout(resolve, speed));
-  }
-  console.log();
-}
-
 // ======================
 // Global Chat State
 // ======================
@@ -75,6 +71,7 @@ interface ChatState {
   title: string;
   chatHistory: (HumanMessage | AIMessage)[];
   graph: any;
+  crawlParams: { url: string; depth: number; base: number };
 }
 
 // Default state: starting with a “normal” chat using the default graph stream.
@@ -83,6 +80,7 @@ let state: ChatState = {
   title: "Default Chat",
   chatHistory: [],
   graph: null,
+  crawlParams: { url: "", depth: 0, base: 0 },
 };
 
 /**
@@ -99,6 +97,7 @@ function resetChatState(
     title: `${mode.toUpperCase()} Chat - ${new Date().toLocaleTimeString()}`,
     chatHistory: [],
     graph: graphFn,
+    crawlParams: { url: "", depth: 0, base: 0 },
   };
   console.log(
     chalk.green(`\n✨ New ${mode} thread started! Thread ID: ${state.threadId}`)
@@ -138,25 +137,37 @@ async function chatLoop() {
     }
 
     // Check for mode-switch commands:
-    if (trimmed.toLowerCase() === "/research") {
+    else if (trimmed.toLowerCase() === "/research") {
       resetChatState("research", graph.research);
       await setModeFromMemoryStore(APP_MODES.research);
       rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
       rl.prompt();
       return;
-    }
+    } else if (trimmed.toLowerCase() === "/crawl") {
+      const { depth, base, url } = await getCrawlParams(rl);
 
-    if (trimmed.toLowerCase() === "/crawl") {
+      // Store parameters in state
       resetChatState("crawl", graph.crawl);
+      state.crawlParams = { depth, base, url }; // Add this to ChatState interface
+
       await setModeFromMemoryStore(APP_MODES.crawl);
       rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
       rl.prompt();
       return;
-    }
-
-    if (trimmed.toLowerCase() === "/browse") {
+    } else if (trimmed.toLowerCase() === "/browse") {
       resetChatState("browse", graph.browse);
+
       await setModeFromMemoryStore(APP_MODES.browse);
+      rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
+      rl.prompt();
+      return;
+    } else if (
+      !COMMANDS.includes(trimmed.toLowerCase()) &&
+      state.title === "Default Chat"
+    ) {
+      console.log(
+        chalk.red("please select chat type: /research, /crawl, /browse")
+      );
       rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
       rl.prompt();
       return;
@@ -169,11 +180,26 @@ async function chatLoop() {
     }).start();
 
     try {
-      // Add the user's message to the history.
-      state.chatHistory.push(new HumanMessage({ content: input }));
+      // handle crawl
+      // chatgpt safe gaurds as soon as it sees url
+      // it says it can't search, it can't blah blah blah
+      // so this is the fucking solution
+      if (state.title.includes("CRAWL")) {
+        const { depth, base, url } = state.crawlParams;
+        state.chatHistory.push(
+          new HumanMessage({
+            content: `CRAWL RESULTS: ${JSON.stringify(
+              await crawlTool(depth, url, base)
+            )}\n\nUSER QUESTION: ${input}`,
+          })
+        );
+      } else {
+        // Add the user's message to the history.
+        state.chatHistory.push(new HumanMessage({ content: input }));
+      }
 
       // Call the current graph function using the current thread's context.
-      const stream = await state.graph.invoke(
+      const stream = await state.graph.stream(
         {
           messages: state.chatHistory,
           threadId: state.threadId,
@@ -184,19 +210,15 @@ async function chatLoop() {
       spinner.succeed(chalk.green("AI Response:"));
 
       let fullResponse = "";
-      for await (const chunk of stream) {
-        if (chunk?.messages?.[0]?.content) {
-          const content = chunk.messages[0].content;
-          await typewriter(content);
-          fullResponse += content;
-        }
+      for await (const chunk of await stream) {
+        prettifyOutput(chunk);
       }
 
       // Append the AI response to the chat history.
       state.chatHistory.push(new AIMessage({ content: fullResponse }));
     } catch (error: any) {
       spinner.fail(chalk.red("Quantum flux detected!"));
-      console.error(chalk.red(`Error: ${error.message}`));
+      console.error(chalk.red(`Error: ${error.message}`), error);
     }
     rl.prompt();
   }).on("close", () => {

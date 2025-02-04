@@ -38,3 +38,38 @@ export type SearchResults = z.infer<typeof SearchResultsSchema>;
 
 export const SearchResultSchemaParser =
   StructuredOutputParser.fromZodSchema(SearchResultsSchema);
+
+export const ResearchTaskSchema = z.object({
+  topic: z.string(),
+  keyFindings: z.array(z.string()),
+  references: z.array(z.string().url()),
+});
+
+export type ResearchTask = z.infer<typeof ResearchTaskSchema>;
+
+export const ResearchTaskSchemaParser =
+  StructuredOutputParser.fromZodSchema(ResearchTaskSchema);
+
+export const CrawlTaskSchema = z.object({
+  urls: z.array(z.string().url()),
+  depth: z.number(),
+  base: z.number(),
+  description: z.string({ description: "describe objective" }),
+});
+
+export type CrawlTask = z.infer<typeof CrawlTaskSchema>;
+
+export const CrawlTaskSchemaParser =
+  StructuredOutputParser.fromZodSchema(CrawlTaskSchema);
+
+export const BrowserTaskSchema = z.object({
+  steps: z.array(
+    z.string({ description: "high level browser automation actions." })
+  ),
+  objective: z.string({ description: "objective from the task" }),
+});
+
+export type BrowserTask = z.infer<typeof BrowserTaskSchema>;
+
+export const BrowserTaskSchemaParser =
+  StructuredOutputParser.fromZodSchema(BrowserTaskSchema);

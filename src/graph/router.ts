@@ -9,16 +9,16 @@ export function router(state: typeof AppState.State) {
     return "call_tool";
   }
 
+  // // if the workflow is search invoke the tool
+  // if (state.sender === NODE_NAMES.hltasker) {
+  // }
+
   if (
     typeof lastMessage.content === "string" &&
     lastMessage.content.includes("FINAL ANSWER")
   ) {
-    // Any agent decided the work is done
-    console.log("Researcher decision point:", state.sender);
-
     return "end";
   }
-  console.log("Researcher decision point:", state.sender);
 
   return "continue";
 }

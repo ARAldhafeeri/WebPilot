@@ -10,12 +10,15 @@ import { AIMessageChunk, HumanMessage } from "@langchain/core/messages";
 import type { RunnableConfig } from "@langchain/core/runnables";
 import { AppState } from "../graph/state";
 import {
+  BrowserTaskSchemaParser,
+  CrawlTaskSchemaParser,
   HighLevelTaskSchemaParser,
+  ResearchTaskSchemaParser,
   SearchResultSchemaParser,
   TaskSchemaResponseParser,
 } from "../schemas/task";
 import { CrawlSufficientResponseParser } from "../schemas/crawl";
-import { AGENT_NAMES } from "../agents/names";
+import { NODE_NAMES } from "../config/names";
 
 /**
  * Create an agent that can run a set of tools.
@@ -67,33 +70,25 @@ export async function runAgentNode(props: {
 
   // Handle parsed results
   switch (name) {
-    case AGENT_NAMES.hltasker:
+    case NODE_NAMES.hlResearchTasker:
       if (!result.tool_calls || result.tool_calls.length === 0) {
-        stateUpdates.highLevelTask = await HighLevelTaskSchemaParser.parse(
+        stateUpdates.researchTask = await ResearchTaskSchemaParser.parse(
           result.content
         );
       }
       break;
-    case AGENT_NAMES.lltasker:
+
+    case NODE_NAMES.hlBrowserTasker:
+      if (!result.tool_calls || result.tool_calls.length === 0) {
+        stateUpdates.browserTasks = await BrowserTaskSchemaParser.parse(
+          result.content
+        );
+      }
+      break;
+    case NODE_NAMES.lltasker:
       stateUpdates.currentTask = await TaskSchemaResponseParser.parse(
         result.content
       );
-      break;
-    case AGENT_NAMES.crawler:
-      if (!result.tool_calls || result.tool_calls.length === 0) {
-        stateUpdates.crawlData = await CrawlSufficientResponseParser.parse(
-          result.content
-        );
-      }
-      break;
-    case AGENT_NAMES.researcher:
-      if (!result.tool_calls || result.tool_calls.length === 0) {
-        stateUpdates.searchResults = await SearchResultSchemaParser.parse(
-          result.content
-        );
-      }
-      break;
-    case AGENT_NAMES.executor:
       break;
     default:
       break;
