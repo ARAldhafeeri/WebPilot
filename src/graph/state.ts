@@ -3,9 +3,14 @@ import { Annotation } from "@langchain/langgraph";
 import { HighLevelTask, SearchResults, Task } from "../schemas/task";
 import { CrawlSufficient } from "../schemas/crawl";
 import { Link } from "../types/memory";
+import { APP_MODES } from "../agents/modes";
 
 // This defines the object that is passed between each node
 export const AppState = Annotation.Root({
+  mode: Annotation<string>({
+    reducer: (prev, next) => next ?? prev ?? APP_MODES.research,
+    default: () => APP_MODES.research,
+  }),
   messages: Annotation<BaseMessage[]>({
     reducer: (prev, next) => prev.concat(next),
   }),

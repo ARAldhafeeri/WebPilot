@@ -14,7 +14,8 @@ An intelligent AI CLI tool prompt to browser automation powered by AI models (Op
 ## Prerequisites
 
 - Node.js v20+
-- AI API key (OpenAI or DeepSeek)
+- API key (OpenAI)
+- API key for trivaly ( for researcher )
 
 ## Supported platforms
 
@@ -41,71 +42,43 @@ API_KEY=your-api-key
 MODEL_PROVIDER=your-model-provider
 MODEL_SLUG=your-model-slug
 TAVILY_API_KEY=your-tavily-api-key
-SEARCH_RESULTS="3"
 
 # dev options
 LANGSMITH_TRACING=true
 LANGSMITH_ENDPOINT="your-lang-smith-url"
 LANGSMITH_API_KEY="your-lang-smith-api-key"
 LANGSMITH_PROJECT="your-lang-smith-project-name"
+
+
+SEARCH_RESULTS="3"
+SEARCH_DEPTH ="3"
+
+CRAWL_BASE="2"
+CRAWL_DEPTH="3"
 ```
 
-dev options: are for integrating with langsmith.
-search results, control the number of search the results the Agentic AI fetches from tavily.
-the others are self explaintory.
+- dev options: are for integrating with langsmith for development purposes.
+- `SEARCH_RESULTS` : Will determine the number of results per search query.
+- `SEARCH_DEPTH` : Will determine the number of research based on the result of search query, e.g. if research result is 1, dpeth is 2:
+  - A : search results 1.
+  - B: formulate query and research the search results from A.
+  - C: forumulate search query from B results and research the search results from B.
+  - Report research from A, B, C.
 
 ## Usage
 
 ```bash
-npm run start -- <command> [options]
+npm run start
 ```
 
 ### Basic Commands
 
-```bash
-# Execute a simple task
-npm run start -- execute "Book a 7pm reservation for 2 at Best Italian in NYC"
+Inside the chat interface you can do three commands :
 
-# Crawl website with objective
-npm run start -- crawl --url https://example.com --objective "Find contact information"
-
-# Interactive chat mode
-npm run start -- chat
-```
-
-### Command Options
-
-```
-Options:
-  -u, --url <url>         Starting URL for the task
-  -o, --objective <text>  Task objective description
-  -v, --verbose           Show detailed execution logs
-  --headless              Run browser in headless mode
-  --model <name>          Specify AI model (default: gpt-4)
-  --output <format>       Set output format (json/text/csv)
-```
-
-## Examples
-
-## Security Considerations
-
-1. Always keep API keys in `.env` file, ignore in .gitignore
-2. Use `--headless` mode for server environments
-3. Review generated actions before execution
-4. Limit access to sensitive browsing sessions
-
-## Development
-
-```bash
-# Run in development mode
-npm run dev -- execute "Your task here"
-
-# Run tests
-npm test
-
-# Build production bundle
-npm run build
-```
+1. `/exit` : exit the cli tool.
+2. `/research`: start new research chat inside any other chat.
+3. `/crawl`: start new crawl chat inside any other chat.
+4. `/browse`: start new browse chat inside any other chat.
 
 ## Contributing
 
@@ -116,7 +89,3 @@ npm run build
 ## License
 
 MIT License ( Ahmed Rakan )
-
-```
-
-```

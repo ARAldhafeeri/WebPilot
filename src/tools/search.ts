@@ -1,5 +1,5 @@
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
-
+import { SEARCH_RESULTS } from "../getEnv";
 export const searchTool = new TavilySearchResults({
-  maxResults: 2,
+  maxResults: SEARCH_RESULTS,
 });

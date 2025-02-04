@@ -35,16 +35,37 @@ The Next-Generation Research CLI Tool is designed to empower researchers by prov
 
 The architecture of the CLI tool is modular, ensuring separation of concerns and ease of maintenance. The tool can perform three main tasks when user enter command `/research`, `/crawl` or `/browse` :
 
-1. `/research` : The tool integrate with <a href="https://tavily.com/">Tavily</a> search engine, the agent will keep requesting the engine for search result until it have enough information to provide the answer. The number of search results is controlled via enviroment variable called `SEARCH_RESULTS`. This will control how many search results per query the A.I gets. The way to trigger the research functionality is by typing /research at any point of the chat in the CLI tool.
+1. `/research` : The tool integrate with <a href="https://tavily.com/">Tavily</a> search engine, the agent will keep requesting the engine for search result until it have enough information to provide the answer. The number of search results is controlled via enviroment variable called `SEARCH_RESULTS`, `SEARCH_DEPTH`.
+
+- `SEARCH_RESULTS` : Will determine the number of results per search query.
+- `SEARCH_DEPTH` : Will determine the number of research based on the result of search query, e.g. if research result is 1, dpeth is 2:
+  - A : search results 1.
+  - B: formulate query and research the search results from A.
+  - C: forumulate search query from B results and research the search results from B.
+  - Report research from A, B, C.
 
 2. `/crawl`: The tool will allow you to crawl websites for specific items. The crawl intensity is controllable via two enviroment variables `CRAWL_PAGE`, `CRAWL_DEPTH`:
 
-- `CRAWL_PAGE`: Controls the number of links fetched from a single url.
+- `CRAWL_BASE`: Controls the number of links fetched from a single url.
 - `CRAWL_DEPTH`: Controls the depth of crawling from each link.
 
-e.g. CRAWL_PAGE = 2, CRAWL_DEPTH = 2. This will make the A.I go into the two links crawl the content, fetch two links from go two level inside each link on the page and crawl the result from each.
+e.g. CRAWL_BASE = 2, CRAWL_DEPTH = 2.
 
-3. `/browse`: The tool will crawl the website to perform the browser tasks, once the tasks are generated, you will see a brwowser pop up and you will be able to see the Agentic A.I browse for you. The browser for the /browse session will not be clossed until you close it with `/crawl`, `/browse`, `/research` commands.
+1. A: A.I will crawl the content of the two base links.
+2. B: A.I will crawl the content of A page links.
+3. C: A.I will crawl the content of B page links.
+4. Exit and report final answer.
+
+A.I is configured to crawl the following:
+
+1. **Title & Headings** (`<title>`, `<h1>`, `<h2>`)
+2. **Body Text** (`<p>`, `<article>`)
+3. **Meta Descriptions & Keywords** (`<meta>` tags)
+4. **References & Citations** (`<a href>` to research papers, DOIs)
+
+ONLY, we will add more in the future.
+
+4. `/browse`: The tool will crawl the website to perform the browser tasks, once the tasks are generated, you will see a brwowser pop up and you will be able to see the Agentic A.I browse for you. The browser for the /browse session will not be clossed until you close it with `/crawl`, `/browse`, `/research` commands.
 
 <img src="./assets/arch.png" width=400 alt="webpilot cli architecture" />
 
@@ -56,14 +77,16 @@ e.g. CRAWL_PAGE = 2, CRAWL_DEPTH = 2. This will make the A.I go into the two lin
 
 ### 4.1 CLI Interface and Command Parser
 
+- **Technologies:**
+
+  - Langchain, Langgraph, OpenAI
+  - NodeJS
+
 - **Responsibilities:**
   - Accept and parse user inputs.
   - Dispatch commands to the appropriate modules.
   - invoke correct graph based on entered command.
   - generate chat thread id for every command invoked.
-- **Technologies:**
-  - Langchain, OpenAI
-  - NodeJS
 - **Key Features:**
   - Command aliasing.
   - Data presistance.
