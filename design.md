@@ -1,7 +1,3 @@
-Below is a sample **Design Document** for your next-generation research CLI tool. This document outlines the tool’s architecture, components, and workflows. You can adjust details as needed to align with your specific requirements and internal design decisions.
-
----
-
 # Next-Generation Research CLI Tool Design Document
 
 **Version:** 1.0  
