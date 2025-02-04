@@ -1,7 +1,7 @@
 import { browserService } from "../services";
 
 export async function openBrowser() {
-  const page = browserService.initializeBrowser();
+  const page = await browserService.initializeBrowser();
   return page;
 }
 
