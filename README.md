@@ -6,22 +6,21 @@ An intelligent AI CLI tool prompt to browser automation powered by AI models (Op
 
 - Natural language task processing
 - Smart website crawling
-- AI-driven action generation
+- AI-driven browser automation
 - CLI interface for easy operation
-- Session memory and context preservation
-- Cross-platform support
 
 ## Prerequisites
 
 - Node.js v20+
-- API key (OpenAI)
+- API key (OpenAI or any other modal via openrouter)
 - API key for trivaly ( for researcher )
 
 ## Supported platforms
 
-- OpenAI
-- Deepseek ( coming soon)
-- Ollama ( coming soon )
+- OpenAI ( <a href="openai.com" >openai</a> )
+- Otehrs ( <a href="openrouter.ai">openrouter</a>)
+
+Works great with GhatGPT4-mini, better with reasoning models like o1-mini, o3-mini, r1 (deepseek)
 
 ## Installation
 
@@ -39,9 +38,10 @@ npx playwright install chromium
 
 ```env
 API_KEY=your-api-key
-MODEL_PROVIDER=your-model-provider
+PROVIDER_BASE_URL=your-model-api-gateaway-base-url
 MODEL_SLUG=your-model-slug
 TAVILY_API_KEY=your-tavily-api-key
+SEARCH_RESULTS="3"
 
 # dev options
 LANGSMITH_TRACING=true

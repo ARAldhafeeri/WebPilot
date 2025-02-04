@@ -1,4 +1,5 @@
 import { llm } from "../config";
+import { getModeFromMemoryStore } from "../config/modes";
 import createAgent from "../utils/agent";
 
 export const reportAgent = await createAgent({
@@ -9,6 +10,6 @@ export const reportAgent = await createAgent({
     1. search results report based on the data.
     2. crawl results report based on the data.
     3. browse result report based on the data.
-
+    current mode is ${await getModeFromMemoryStore()}
   `,
 });

@@ -7,6 +7,7 @@ import {
   highLevelTasksNode,
   lowLevelTasksNode,
   reportNode,
+  toolNode,
 } from "../nodes";
 import { AGENT_NAMES } from "../../agents/names";
 
@@ -27,20 +28,21 @@ const browseWorkflow = new StateGraph(AppState)
   .addNode(AGENT_NAMES.crawler, crawlerNode)
   .addNode(AGENT_NAMES.lltasker, lowLevelTasksNode)
   .addNode(AGENT_NAMES.executor, executorNode)
-  .addNode(AGENT_NAMES.reporter, reportNode);
+  .addNode(AGENT_NAMES.reporter, reportNode)
+  .addNode("call_tool", toolNode);
 
 browseWorkflow
   .addEdge(START, AGENT_NAMES.hltasker)
   .addEdge(AGENT_NAMES.hltasker, AGENT_NAMES.crawler)
   .addConditionalEdges(AGENT_NAMES.crawler, router, {
-    continue: AGENT_NAMES.crawler,
+    continue: AGENT_NAMES.lltasker,
     call_tool: "call_tool",
-    end: AGENT_NAMES.lltasker,
+    end: END,
   })
   .addEdge(AGENT_NAMES.lltasker, AGENT_NAMES.executor)
   .addConditionalEdges(AGENT_NAMES.executor, router, {
-    continue: AGENT_NAMES.executor,
-    end: AGENT_NAMES.reporter,
+    continue: AGENT_NAMES.reporter,
+    end: END,
     call_tool: "call_tool",
   })
   .addEdge(AGENT_NAMES.reporter, END)

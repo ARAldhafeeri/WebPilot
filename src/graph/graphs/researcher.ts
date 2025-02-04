@@ -20,8 +20,9 @@ const researchWorkflow = new StateGraph(AppState)
   .addEdge(START, AGENT_NAMES.researcher)
   // Ask the router if we need more search results or if we should finish
   .addConditionalEdges(AGENT_NAMES.researcher, router, {
-    continue: AGENT_NAMES.researcher, // Continue searching if not enough results yet
-    end: AGENT_NAMES.reporter, // Otherwise, produce the final report
+    continue: AGENT_NAMES.reporter,
+    end: END,
+    call_tool: "call_tool",
   })
   .addEdge(AGENT_NAMES.reporter, END)
   .addConditionalEdges(

@@ -3,7 +3,7 @@ import { Annotation } from "@langchain/langgraph";
 import { HighLevelTask, SearchResults, Task } from "../schemas/task";
 import { CrawlSufficient } from "../schemas/crawl";
 import { Link } from "../types/memory";
-import { APP_MODES } from "../agents/modes";
+import { APP_MODES } from "../config/modes";
 
 // This defines the object that is passed between each node
 export const AppState = Annotation.Root({

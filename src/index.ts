@@ -11,8 +11,7 @@ import { existsSync, writeFileSync } from "node:fs";
 import { v4 as uuidv4 } from "uuid";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { graph } from "./graph/index";
-import { AppState } from "./graph/state";
-import { APP_MODES } from "./agents/modes";
+import { APP_MODES, setModeFromMemoryStore } from "./config/modes";
 // It is assumed that your graph module exports dedicated functions:
 //   - research(params, options)
 //   - crawl(params, options)
@@ -75,7 +74,7 @@ interface ChatState {
   threadId: string;
   title: string;
   chatHistory: (HumanMessage | AIMessage)[];
-  currentGraphFn: any;
+  graph: any;
 }
 
 // Default state: starting with a “normal” chat using the default graph stream.
@@ -83,7 +82,7 @@ let state: ChatState = {
   threadId: uuidv4(),
   title: "Default Chat",
   chatHistory: [],
-  currentGraphFn: null,
+  graph: null,
 };
 
 /**
@@ -93,13 +92,13 @@ let state: ChatState = {
  */
 function resetChatState(
   mode: "research" | "crawl" | "browse",
-  graphFn: ChatState["currentGraphFn"]
+  graphFn: ChatState["graph"]
 ) {
   state = {
     threadId: uuidv4(),
     title: `${mode.toUpperCase()} Chat - ${new Date().toLocaleTimeString()}`,
     chatHistory: [],
-    currentGraphFn: graphFn,
+    graph: graphFn,
   };
   console.log(
     chalk.green(`\n✨ New ${mode} thread started! Thread ID: ${state.threadId}`)
@@ -141,7 +140,7 @@ async function chatLoop() {
     // Check for mode-switch commands:
     if (trimmed.toLowerCase() === "/research") {
       resetChatState("research", graph.research);
-      AppState.State.mode = APP_MODES.research;
+      await setModeFromMemoryStore(APP_MODES.research);
       rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
       rl.prompt();
       return;
@@ -149,7 +148,7 @@ async function chatLoop() {
 
     if (trimmed.toLowerCase() === "/crawl") {
       resetChatState("crawl", graph.crawl);
-      AppState.State.mode = APP_MODES.crawl;
+      await setModeFromMemoryStore(APP_MODES.crawl);
       rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
       rl.prompt();
       return;
@@ -157,7 +156,7 @@ async function chatLoop() {
 
     if (trimmed.toLowerCase() === "/browse") {
       resetChatState("browse", graph.browse);
-      AppState.State.mode = APP_MODES.browse;
+      await setModeFromMemoryStore(APP_MODES.browse);
       rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
       rl.prompt();
       return;
@@ -174,7 +173,7 @@ async function chatLoop() {
       state.chatHistory.push(new HumanMessage({ content: input }));
 
       // Call the current graph function using the current thread's context.
-      const stream = await state.currentGraphFn(
+      const stream = await state.graph.invoke(
         {
           messages: state.chatHistory,
           threadId: state.threadId,
