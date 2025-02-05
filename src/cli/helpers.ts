@@ -21,7 +21,6 @@ export const workflows = {
 };
 // Clear the current line and output a new message.
 export function console_out(msg: string) {
-  process.stdout.cursorTo(0);
   console.log(msg);
   rl.prompt(true);
 }
@@ -91,8 +90,10 @@ export async function onUserInput(userInput: string) {
   }
   switch (command) {
     case workflows.exit:
-      setCliPrompt(">");
-      console_out(chalk.yellow("\n🛸 Farewell, space traveler!"));
+      console.log(chalk.yellow("\n🌌 The stars dim as you depart..."));
+      console.log(
+        chalk.magenta.bold("🚀 Safe travels, spacefarer. Until we meet again!")
+      );
       rl.close();
       process.exit(0);
 

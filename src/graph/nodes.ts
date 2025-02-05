@@ -11,7 +11,7 @@ import { llTaskerAgent } from "../agents/lltasker";
 
 import { NODE_NAMES } from "../config/names";
 import { reportAgent } from "../agents/reporter";
-import { searchTool } from "../tools/search";
+import { researcherQuestionTool, searchTool } from "../tools/search";
 import { crawlTool } from "../tools/crawl";
 import { executorTool } from "../tools/executor";
 // high level task generation nodes
@@ -76,6 +76,9 @@ export async function reportNode(
   });
 }
 
-export const searchToolNode = new ToolNode([searchTool]);
+export const searchToolNode = new ToolNode([
+  searchTool,
+  researcherQuestionTool,
+]);
 
 export const executeToolNode = new ToolNode([executorTool]);

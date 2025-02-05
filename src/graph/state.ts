@@ -1,15 +1,6 @@
 import { BaseMessage } from "@langchain/core/messages";
 import { Annotation } from "@langchain/langgraph";
-import {
-  BrowserTask,
-  CrawlTask,
-  HighLevelTask,
-  ResearchTask,
-  SearchResults,
-  Task,
-} from "../schemas/task";
-import { CrawlSufficient } from "../schemas/crawl";
-import { Link } from "../types/memory";
+import { ResearchTask, SearchResults, Task } from "../schemas/task";
 import { APP_MODES } from "../config/modes";
 
 // This defines the object that is passed between each node
@@ -25,17 +16,9 @@ export const AppState = Annotation.Root({
     reducer: (prev, next) => next ?? prev ?? "user",
     default: () => "user",
   }),
-  crawlTaskDescription: Annotation<CrawlTask>({
-    reducer: (prev, next) => next ?? prev ?? null,
-    default: () => ({ depth: 0, base: 1, urls: [], description: "" }),
-  }),
   researchTask: Annotation<ResearchTask>({
     reducer: (prev, next) => next ?? prev ?? null,
     default: () => ({ topic: "", keyFindings: [], references: [] }),
-  }),
-  browserTasks: Annotation<BrowserTask>({
-    reducer: (prev, next) => next ?? prev ?? null,
-    default: () => ({ objective: "", steps: [] }),
   }),
   currentTask: Annotation<Task>({
     reducer: (prev, next) => next ?? prev ?? null,
@@ -44,12 +27,6 @@ export const AppState = Annotation.Root({
       name: "",
       steps: [],
       status: "pending",
-    }),
-  }),
-  crawlData: Annotation<CrawlSufficient>({
-    reducer: (prev, next) => next ?? prev ?? null,
-    default: () => ({
-      pages: new Map(),
     }),
   }),
   searchResults: Annotation<SearchResults>({

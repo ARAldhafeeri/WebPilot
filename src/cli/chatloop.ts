@@ -56,15 +56,12 @@ export async function chatLoop() {
           await onBrwoseChat(input);
           state.isUserPrompt = true;
         }
-        if (state.isUserPrompt) {
+        if (state.isUserPrompt || state.isAiQuestion) {
           await onChatResponseWithLoader(onChatResponse);
-        } else {
-          rl.prompt(true);
         }
         return;
     }
   }).on("close", () => {
-    console_out(chalk.yellow("\n🌌 Connection terminated"));
     process.exit(0);
   });
 }

@@ -5,6 +5,7 @@ export const NODE_NAMES = {
   lltasker: "LowLevelTaskGeneratorAgent",
   reporter: "ReporterAgent",
   crawlTool: "justATool",
-  researchTool: "searchTool",
+  searchTool: "searchTool",
+  researchQuestionTool: "researchQuestionTool",
   executorTool: "executorTool",
 };

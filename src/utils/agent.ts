@@ -19,6 +19,7 @@ import {
 } from "../schemas/task";
 import { CrawlSufficientResponseParser } from "../schemas/crawl";
 import { NODE_NAMES } from "../config/names";
+import { console_out } from "../cli/helpers";
 
 /**
  * Create an agent that can run a set of tools.
@@ -73,14 +74,6 @@ export async function runAgentNode(props: {
     case NODE_NAMES.hlResearchTasker:
       if (!result.tool_calls || result.tool_calls.length === 0) {
         stateUpdates.researchTask = await ResearchTaskSchemaParser.parse(
-          result.content
-        );
-      }
-      break;
-
-    case NODE_NAMES.hlBrowserTasker:
-      if (!result.tool_calls || result.tool_calls.length === 0) {
-        stateUpdates.browserTasks = await BrowserTaskSchemaParser.parse(
           result.content
         );
       }

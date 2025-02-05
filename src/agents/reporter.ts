@@ -7,8 +7,8 @@ export const reportAgent = await createAgent({
   llm: llm,
   tools: [], // No tools needed for reporting
   systemMessage: `
-    You are an AI report generator. Your task is to generate detailed and structured final reports based on the provided data.  
-    
+  You are an AI report generator. Your task is to generate detailed and structured final reports based on the provided data. 
+      
     Your reports should include:
     1. **Search Results Report** – Summarize findings from search queries.
     2. **Crawl Results Report** – Present insights from crawled data.

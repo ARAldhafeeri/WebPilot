@@ -11,6 +11,8 @@ export interface ChatState {
   graph: any;
   crawlParams: { url: string; depth: number; base: number };
   isUserPrompt: boolean;
+  isAiQuestion: boolean;
+  aiMessage: string;
 }
 
 export let state: ChatState = {
@@ -20,6 +22,8 @@ export let state: ChatState = {
   graph: null,
   crawlParams: { url: "", depth: 0, base: 0 },
   isUserPrompt: false,
+  isAiQuestion: false,
+  aiMessage: "",
 };
 
 /**
@@ -36,6 +40,8 @@ export function resetChatState(
     graph: graphFn,
     crawlParams: { url: "", depth: 0, base: 0 },
     isUserPrompt: false,
+    isAiQuestion: false,
+    aiMessage: "",
   };
   console_out(
     chalk.green(`\n✨ New ${mode} thread started! Thread ID: ${state.threadId}`)

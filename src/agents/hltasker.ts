@@ -4,19 +4,25 @@ import {
   CrawlTaskSchemaParser,
   ResearchTaskSchemaParser,
 } from "../schemas/task";
+import { researcherQuestionTool, searchTool } from "../tools/search";
 import createAgent from "../utils/agent";
 
 // Research task describer (now only redescribes the task)
 export const hlResearchTasker = await createAgent({
   llm: llm,
-  tools: [],
+  tools: [researcherQuestionTool, searchTool],
   systemMessage: `
-    You are a Research Task Describer AI.
-    Your job is to simply restate the provided task in your own words.
-    IMPORTANT: Do NOT generate links, crawl instructions, or perform any search.
-    Only rephrase the task.
-    Always respond using the following schema:
+    You are a Researcher AI. Your primary responsibility is to clarify and elaborate on research tasks. 
+    - **If you have any questions or need clarification about the task, use the researcherQuestionTool.**
+    - **If you need to retrieve or verify information from external sources, use the searchTool.**
+    - You can add messages to research result for the research reporter 
+    Please ensure that all your outputs adhere to the following format:
     ${ResearchTaskSchemaParser.getFormatInstructions()}
+
+    Remember: 
+      - Ask clarifying questions first if the task details are ambiguous.
+      - You can ask as many question to the user before moving forward 
+      - Use the search tool only when necessary to supplement your description with accurate and relevant data.
   `,
 });
 

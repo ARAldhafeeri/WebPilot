@@ -2,12 +2,12 @@ import { marked } from "marked";
 import { state } from "./state";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { crawlTool } from "../tools/crawl";
-import { console_out, messageContent } from "./helpers";
+import { console_out, messageContent, setCliPrompt } from "./helpers";
 import ora from "ora";
 import chalk from "chalk";
-import rl from "./rl";
 
 export async function onCrawlChat(userMessage: string) {
+  if (!Boolean(userMessage)) return;
   // crawl chat logic
   const { depth, base, url } = state.crawlParams;
   const data = await crawlTool(depth, url, base);
@@ -20,6 +20,7 @@ export async function onCrawlChat(userMessage: string) {
 }
 
 export async function onResearchChat(userMessage: string) {
+  if (!Boolean(userMessage)) return;
   // research chat logic
   state.chatHistory.push(
     new HumanMessage({
@@ -29,6 +30,8 @@ export async function onResearchChat(userMessage: string) {
 }
 
 export async function onAiMessage(aiMessage: string) {
+  if (!Boolean(aiMessage)) return;
+
   state.chatHistory.push(
     new AIMessage({
       content: aiMessage,
@@ -37,7 +40,9 @@ export async function onAiMessage(aiMessage: string) {
 }
 
 export async function onBrwoseChat(userMessage: string) {
+  if (!Boolean(userMessage)) return;
   // browse chat logic
+
   state.chatHistory.push(
     new HumanMessage({
       content: userMessage,
@@ -47,14 +52,35 @@ export async function onBrwoseChat(userMessage: string) {
 
 export async function onChatResponseWithLoader(aiChtResponse: Function) {
   const spinner = ora({
-    text: chalk.hex("#ff66ff")("Accessing neural network..."),
+    text: chalk.bold.hex("#ff66ff")("Summoning the neural abyss..."),
     spinner: "dots2",
-    // very important the cli exit
     discardStdin: false,
   }).start();
+
   const output = await aiChtResponse();
-  spinner.succeed(chalk.green("Ai response:"));
-  console_out(output);
+
+  spinner.succeed(chalk.bold.hex("#66ff66")("Neural beast tamed."));
+
+  if (state.isAiQuestion) {
+    console_out(chalk.bold.green("AI Question:") + " " + chalk.italic(output));
+  } else {
+    console_out(chalk.bold.red("AI Answer:") + " " + chalk.italic(output));
+  }
+
+  // Continue with the user turn
+  userMessageTurn();
+}
+
+export async function aiMessageTurn(message: string) {
+  // reset ai message
+  state.isAiQuestion = true;
+  state.aiMessage = message;
+  state.isUserPrompt = false;
+}
+function userMessageTurn() {
+  state.isAiQuestion = false;
+  state.aiMessage = "";
+  state.isUserPrompt = true;
 }
 
 export async function onChatResponse() {
@@ -71,9 +97,14 @@ export async function onChatResponse() {
   for await (const chunk of stream) {
     fullResponse += await messageContent(chunk);
   }
-  state.chatHistory.push(new AIMessage({ content: fullResponse }));
-  // const output = await marked.parse(fullResponse);
-  const output = fullResponse;
-
-  return output;
+  // ai message handled in onAiResearchQuestion
+  if (!state.isAiQuestion && Boolean(fullResponse)) {
+    state.chatHistory.push(new AIMessage({ content: fullResponse }));
+    const output = await marked.parse(fullResponse);
+    return output;
+  } else if (Boolean(state.aiMessage)) {
+    state.chatHistory.push(new AIMessage({ content: state.aiMessage }));
+    return state.aiMessage;
+  }
+  return;
 }
