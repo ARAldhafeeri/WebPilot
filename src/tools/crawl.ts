@@ -38,7 +38,6 @@ export const crawlTool = async (
     };
     if (currentDepth > depth || visited.has(url)) continue;
 
-    console.log(`Visiting: ${url} (Depth: ${currentDepth})`);
     visited.add(url);
 
     try {

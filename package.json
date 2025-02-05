@@ -43,8 +43,8 @@
     "@langchain/ollama": "^0.1.5",
     "@langchain/openai": "^0.4.2",
     "@types/express-session": "^1.18.1",
+    "@types/socket.io": "^3.0.2",
     "body-parser": "^1.20.3",
-    "consolemd": "^0.3.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -53,8 +53,8 @@
     "marked": "^15.0.6",
     "marked-terminal": "^7.3.0",
     "ora": "^8.2.0",
+    "socket.io": "^4.8.1",
     "uuid": "^11.0.5",
-    "winston": "^3.17.0",
     "zod": "^3.24.1"
   }
 }
