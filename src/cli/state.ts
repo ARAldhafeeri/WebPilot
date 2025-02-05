@@ -10,6 +10,7 @@ export interface ChatState {
   chatHistory: any[]; // Replace with (HumanMessage | AIMessage)[] if you import those types.
   graph: any;
   crawlParams: { url: string; depth: number; base: number };
+  isUserPrompt: boolean;
 }
 
 export let state: ChatState = {
@@ -18,6 +19,7 @@ export let state: ChatState = {
   chatHistory: [],
   graph: null,
   crawlParams: { url: "", depth: 0, base: 0 },
+  isUserPrompt: false,
 };
 
 /**
@@ -33,6 +35,7 @@ export function resetChatState(
     chatHistory: [],
     graph: graphFn,
     crawlParams: { url: "", depth: 0, base: 0 },
+    isUserPrompt: false,
   };
   console_out(
     chalk.green(`\n✨ New ${mode} thread started! Thread ID: ${state.threadId}`)

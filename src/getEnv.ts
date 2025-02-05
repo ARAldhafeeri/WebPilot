@@ -11,3 +11,5 @@ export const PROVIDER_BASE_URL = `${process.env.PROVIDER_BASE_URL}`;
 // search
 export const SEARCH_RESULTS = parseInt(`${process.env.SEARCH_RESULTS}`);
 export const SEARCH_DEPTH = parseInt(`${process.env.SEARCH_RESULTS}`);
+
+export const SOCKET_PORT = parseInt(`${process.env.SOCKET_PORT}`);

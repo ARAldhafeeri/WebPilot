@@ -5,11 +5,29 @@ import { marked } from "marked";
 import TerminalRenderer from "marked-terminal";
 import rl from "./rl";
 import { NODE_NAMES } from "../config/names";
+import { state } from "./state";
+import { graph } from "../graph/index"; // Adjust path as needed
+import { APP_MODES, setModeFromMemoryStore } from "../config/modes";
+import { resetChatState } from "./state";
 
+const COMMANDS = ["/research", "/crawl", "/browse", "/exit"];
+export const workflows = {
+  research: "/research",
+  crawl: "/crawl",
+  browse: "/browse",
+  noCommad: "noCommad",
+  chat: "chat",
+  exit: "/exit",
+};
 // Clear the current line and output a new message.
 export function console_out(msg: string) {
   process.stdout.cursorTo(0);
   console.log(msg);
+  rl.prompt(true);
+}
+
+export function setCliPrompt(prompt: any) {
+  rl.setPrompt(prompt);
   rl.prompt(true);
 }
 
@@ -33,18 +51,90 @@ marked.setOptions({
 });
 
 // Prettify and output AI messages formatted in Markdown.
-export async function prettifyOutput(output: Record<string, any>) {
+export async function messageContent(output: Record<string, any>) {
   const keys = Object.keys(output);
   const firstItem = output[keys[0]];
-  if (!firstItem) return;
+  if (!firstItem) return "";
 
   if ("messages" in firstItem && Array.isArray(firstItem.messages)) {
     const lastMessage = firstItem.messages[firstItem.messages.length - 1];
     // Adjust the sender check as needed (here using a literal 'reporter')
     if ("sender" in firstItem && firstItem["sender"] === NODE_NAMES.reporter) {
       if (lastMessage.content) {
-        console_out(await marked.parse(lastMessage.content));
+        return lastMessage.content;
       }
     }
   }
+  return "";
 }
+
+export function isCrawlThread(chatTitle: string) {
+  return chatTitle.includes("CRAWL");
+}
+
+export function isResearchThread(chatTitle: string) {
+  return chatTitle.includes("RESEARCH");
+}
+
+export function isBrowseThread(chatTitle: string) {
+  return chatTitle.includes("BROWSE");
+}
+
+// commands
+
+export async function onUserInput(userInput: string) {
+  const trimmed = userInput.trim();
+  const command = trimmed.toLowerCase();
+  if (!command) {
+    rl.prompt();
+    return;
+  }
+  switch (command) {
+    case workflows.exit:
+      setCliPrompt(">");
+      console_out(chalk.yellow("\n🛸 Farewell, space traveler!"));
+      rl.close();
+      process.exit(0);
+
+    case workflows.research:
+      resetChatState("research", graph.research);
+      await setModeFromMemoryStore(APP_MODES.research);
+      setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
+      return workflows.research;
+
+    case workflows.crawl: {
+      const { depth, base, url } = await getCrawlParams(rl);
+      resetChatState("crawl", graph.crawl);
+      state.crawlParams = { depth, base, url };
+      await setModeFromMemoryStore(APP_MODES.crawl);
+      setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
+
+      return workflows.crawl;
+    }
+
+    case workflows.browse:
+      resetChatState("browse", graph.browse);
+      await setModeFromMemoryStore(APP_MODES.browse);
+      setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
+      return workflows.browse;
+    // user in chat
+    default:
+      // If input is not a recognized command and the
+      //  default chat type is still active.
+      // ask user to enter a thread with the a.i
+      // if the user in a thread with the a.i continue
+      if (!COMMANDS.includes(command) && state.title === "Default Chat") {
+        console_out(
+          chalk.red("please select chat type: /research, /crawl, /browse")
+        );
+        rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
+        rl.prompt(true);
+        return workflows.noCommad;
+      } else {
+        rl.prompt(true);
+        return;
+      }
+  }
+}
+
+// chats

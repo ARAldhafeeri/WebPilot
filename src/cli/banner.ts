@@ -5,6 +5,7 @@ import figlet from "figlet";
 import { console_out } from "./helpers";
 
 export function displayBanner() {
+  console.clear();
   console_out(
     chalk.hex("#00ff99")(figlet.textSync("WebPilotAI", { font: "Doom" }))
   );

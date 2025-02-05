@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import { initialSetup } from "./cli/initialSetup";
 import { chatLoop } from "./cli/chatloop";
-import "./cli/socketServer";
 
 dotenv.config();
 
@@ -11,7 +10,4 @@ async function main() {
   chatLoop();
 }
 
-main().catch((error) => {
-  console.error(`Fatal Error: ${error.message}`);
-  process.exit(1);
-});
+await main();

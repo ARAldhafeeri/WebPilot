@@ -1,17 +1,25 @@
 // cli/chatLoop.ts
 
 import chalk from "chalk";
-import ora from "ora";
-import { HumanMessage, AIMessage } from "@langchain/core/messages";
-import { graph } from "../graph/index"; // Adjust path as needed
-import { APP_MODES, setModeFromMemoryStore } from "../config/modes";
-import { getCrawlParams, console_out, prettifyOutput } from "./helpers";
-import { state, resetChatState } from "./state";
-import { crawlTool } from "../tools/crawl";
+import {
+  console_out,
+  setCliPrompt,
+  isCrawlThread,
+  isResearchThread,
+  onUserInput,
+  workflows,
+} from "./helpers";
+import {
+  onCrawlChat,
+  onResearchChat,
+  onBrwoseChat,
+  onChatResponseWithLoader,
+  onChatResponse,
+} from "./chats";
+
+import { state } from "./state";
 import { displayBanner } from "./banner";
 import rl from "./rl";
-
-const COMMANDS = ["/research", "/crawl", "/browse", "/exit"];
 
 export async function chatLoop() {
   displayBanner();
@@ -22,99 +30,38 @@ export async function chatLoop() {
     )
   );
 
-  // Ensure the prompt reflects the current chat state.
-  rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
-  rl.prompt();
+  setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
 
   rl.on("line", async (input: string) => {
-    try {
-      const trimmed = input.trim();
+    const workfLowOutput = await onUserInput(input);
 
-      // Exit command.
-      if (trimmed.toLowerCase() === "/exit") {
-        console_out(chalk.yellow("\n🛸 Farewell, space traveler!"));
-        rl.close();
-        process.exit(0);
-      }
-
-      // Mode switch commands.
-      else if (trimmed.toLowerCase() === "/research") {
-        resetChatState("research", graph.research);
-        await setModeFromMemoryStore(APP_MODES.research);
-        rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
-        rl.prompt();
+    switch (workfLowOutput) {
+      // handle default chat commands
+      case workflows.research:
         return;
-      } else if (trimmed.toLowerCase() === "/crawl") {
-        const { depth, base, url } = await getCrawlParams(rl);
-        resetChatState("crawl", graph.crawl);
-        state.crawlParams = { depth, base, url };
-        await setModeFromMemoryStore(APP_MODES.crawl);
-        rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
-        rl.prompt();
+      case workflows.browse:
         return;
-      } else if (trimmed.toLowerCase() === "/browse") {
-        resetChatState("browse", graph.browse);
-        await setModeFromMemoryStore(APP_MODES.browse);
-        rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
-        rl.prompt();
+      case workflows.crawl:
         return;
-      } else if (
-        !COMMANDS.includes(trimmed.toLowerCase()) &&
-        state.title === "Default Chat"
-      ) {
-        console_out(
-          chalk.red("please select chat type: /research, /crawl, /browse")
-        );
-        rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
-        rl.prompt();
+      case workflows.noCommad:
         return;
-      }
-
-      // Process a normal chat message.
-      const spinner = ora({
-        text: chalk.hex("#ff66ff")("Accessing neural network..."),
-        spinner: "dots2",
-      }).start();
-
-      try {
-        if (state.title.includes("CRAWL")) {
-          const { depth, base, url } = state.crawlParams;
-          state.chatHistory.push(
-            new HumanMessage({
-              content: `CRAWL RESULTS: ${JSON.stringify(
-                await crawlTool(depth, url, base)
-              )}\n\nUSER QUESTION: ${input}`,
-            })
-          );
+      default:
+        if (isCrawlThread(state.title)) {
+          await onCrawlChat(input);
+          state.isUserPrompt = true;
+        } else if (isResearchThread(state.title)) {
+          await onResearchChat(input);
+          state.isUserPrompt = true;
         } else {
-          state.chatHistory.push(new HumanMessage({ content: input }));
+          await onBrwoseChat(input);
+          state.isUserPrompt = true;
         }
-
-        // Call the current graph function using the chat thread’s context.
-        const stream = await state.graph.stream(
-          {
-            messages: state.chatHistory,
-            threadId: state.threadId,
-            title: state.title,
-          },
-          { recursionLimit: 150 }
-        );
-        spinner.succeed(chalk.green("AI Response:"));
-
-        let fullResponse = "";
-        for await (const chunk of await stream) {
-          fullResponse += chunk;
-          await prettifyOutput(chunk);
+        if (state.isUserPrompt) {
+          await onChatResponseWithLoader(onChatResponse);
+        } else {
+          rl.prompt(true);
         }
-        state.chatHistory.push(new AIMessage({ content: fullResponse }));
-      } catch (error: any) {
-        spinner.fail(chalk.red("Quantum flux detected!"));
-        console_out(chalk.red(`Error: ${error.message}`));
-      }
-    } catch (error: any) {
-      console_out(chalk.red(`Unexpected error: ${error.message}`));
-    } finally {
-      rl.prompt();
+        return;
     }
   }).on("close", () => {
     console_out(chalk.yellow("\n🌌 Connection terminated"));
