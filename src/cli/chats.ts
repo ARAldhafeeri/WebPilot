@@ -12,7 +12,7 @@ export async function onCrawlChat(userMessage: string) {
   const { depth, base, url } = state.crawlParams;
   const data = await crawlTool(depth, url, base);
   state.chatHistory.push(
-    new HumanMessage({
+    new AIMessage({
       content: `CRAWL RESULTS: ${data} \n\nUSER QUESTION: ${userMessage}`,
     })
   );
@@ -41,10 +41,13 @@ export async function onAiMessage(aiMessage: string) {
 export async function onBrwoseChat(userMessage: string) {
   if (!Boolean(userMessage)) return;
   // browse chat logic
-
+  if (!Boolean(userMessage)) return;
+  // research chat logic
+  const { browseURL, pages } = state.browseParams;
+  const data = await crawlTool(pages, browseURL, 1);
   state.chatHistory.push(
     new HumanMessage({
-      content: userMessage,
+      content: `CRAWL RESULTS: ${data} \n\nUSER wants: ${userMessage}`,
     })
   );
 }

@@ -10,6 +10,7 @@ export interface ChatState {
   chatHistory: any[]; // Replace with (HumanMessage | AIMessage)[] if you import those types.
   graph: any;
   crawlParams: { url: string; depth: number; base: number };
+  browseParams: { browseURL: string; pages: number };
   isUserPrompt: boolean;
   isAiQuestion: boolean;
   aiMessage: string;
@@ -21,6 +22,7 @@ export let state: ChatState = {
   chatHistory: [],
   graph: null,
   crawlParams: { url: "", depth: 0, base: 0 },
+  browseParams: { browseURL: "", pages: 0 },
   isUserPrompt: false,
   isAiQuestion: false,
   aiMessage: "",
@@ -39,6 +41,7 @@ export function resetChatState(
     chatHistory: [],
     graph: graphFn,
     crawlParams: { url: "", depth: 0, base: 0 },
+    browseParams: { browseURL: "", pages: 0 },
     isUserPrompt: false,
     isAiQuestion: false,
     aiMessage: "",

@@ -19,7 +19,7 @@ import {
 } from "../schemas/task";
 import { CrawlSufficientResponseParser } from "../schemas/crawl";
 import { NODE_NAMES } from "../config/names";
-import { console_out } from "../cli/helpers";
+import { runExecutorTask } from "../tools/executor";
 
 /**
  * Create an agent that can run a set of tools.
@@ -73,15 +73,18 @@ export async function runAgentNode(props: {
   switch (name) {
     case NODE_NAMES.hlResearchTasker:
       if (!result.tool_calls || result.tool_calls.length === 0) {
-        stateUpdates.researchTask = await ResearchTaskSchemaParser.parse(
-          result.content
-        );
+        try {
+          stateUpdates.researchTask = await ResearchTaskSchemaParser.parse(
+            result.content
+          );
+        } catch {}
       }
       break;
     case NODE_NAMES.lltasker:
       stateUpdates.currentTask = await TaskSchemaResponseParser.parse(
         result.content
       );
+      runExecutorTask(stateUpdates.currentTask);
       break;
     default:
       break;

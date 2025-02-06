@@ -6,7 +6,7 @@ import TerminalRenderer from "marked-terminal";
 import rl from "./rl";
 import { NODE_NAMES } from "../config/names";
 import { state } from "./state";
-import { graph } from "../graph/index"; // Adjust path as needed
+import { graph } from "../graph/index";
 import { APP_MODES, setModeFromMemoryStore } from "../config/modes";
 import { resetChatState } from "./state";
 
@@ -16,6 +16,7 @@ export const COMMANDS = [
   "/browse",
   "/exit",
   "/crawl/reset",
+  "/browse/reset",
 ];
 export const workflows = {
   research: "/research",
@@ -25,6 +26,7 @@ export const workflows = {
   chat: "chat",
   exit: "/exit",
   crawlReset: "/crawl/reset",
+  browseReset: "/browse/reset",
 };
 // Clear the current line and output a new message.
 export function console_out(msg: string) {
@@ -42,13 +44,33 @@ export async function getCrawlParams(
   rl: any
 ): Promise<{ depth: number; base: number; url: string }> {
   const depth = parseInt(
-    await rl.question(chalk.cyan("Enter crawl depth (1-3): "))
+    await rl.question(chalk.cyan("Enter crawl depth (1-10): "))
   );
   const base = parseInt(
     await rl.question(chalk.cyan("Enter base links per page (1-10): "))
   );
-  const url = await rl.question(chalk.cyan("Enter starting URL: "));
+  const url = await rl.question(
+    chalk.cyan(
+      "Enter starting URL e.g. https://www.example.com ( must follow schema): "
+    )
+  );
   return { depth, base, url };
+}
+// prompt user for browse parameters
+export async function getBrowseParams(
+  rl: any
+): Promise<{ pages: number; browseURL: string }> {
+  const pages = parseInt(
+    await rl.question(
+      chalk.cyan("Enter number of pages to complete browse task  (1-10): ")
+    )
+  );
+  const browseURL = await rl.question(
+    chalk.cyan(
+      "Enter starting URL e.g. https://www.example.com ( must follow schema): "
+    )
+  );
+  return { pages, browseURL };
 }
 
 // Configure the Markdown renderer.
@@ -99,7 +121,9 @@ export async function onUserInput(userInput: string) {
     case workflows.exit:
       console.log(chalk.yellow("\n🌌 The stars dim as you depart..."));
       console.log(
-        chalk.magenta.bold("🚀 Safe travels, spacefarer. Until we meet again!")
+        chalk.magenta.bold(
+          "🚀 Safe travels between the stars, spacefarer. Until we meet again!"
+        )
       );
       rl.close();
       process.exit(0);
@@ -111,18 +135,16 @@ export async function onUserInput(userInput: string) {
       return workflows.research;
 
     case workflows.crawl: {
-      const { depth, base, url } = await getCrawlParams(rl);
       resetChatState("crawl", graph.crawl);
-      state.crawlParams = { depth, base, url };
+      state.crawlParams = await getCrawlParams(rl);
       await setModeFromMemoryStore(APP_MODES.crawl);
       setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
 
       return workflows.crawl;
     }
     case workflows.crawlReset:
-      const { depth, base, url } = await getCrawlParams(rl);
       resetChatState("crawl", graph.crawl);
-      state.crawlParams = { depth, base, url };
+      state.crawlParams = await getCrawlParams(rl);
       await setModeFromMemoryStore(APP_MODES.crawl);
       setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
 
@@ -130,6 +152,13 @@ export async function onUserInput(userInput: string) {
 
     case workflows.browse:
       resetChatState("browse", graph.browse);
+      state.browseParams = await getBrowseParams(rl);
+      await setModeFromMemoryStore(APP_MODES.browse);
+      setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
+      return workflows.browse;
+    case workflows.browseReset:
+      resetChatState("browse", graph.browse);
+      state.browseParams = await getBrowseParams(rl);
       await setModeFromMemoryStore(APP_MODES.browse);
       setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
       return workflows.browse;
@@ -154,5 +183,3 @@ export async function onUserInput(userInput: string) {
       }
   }
 }
-
-// chats

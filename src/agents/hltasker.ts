@@ -42,8 +42,9 @@ export const hlBrowserTasker = await createAgent({
   tools: [],
   systemMessage: `
     You are a Browser Task Describer AI.
-    Your task is to rephrase the provided browser automation task without adding any extra details like navigation URLs or crawl/search actions.
-    Only provide a simple restatement of the task.
+    Your task is to clean up the crawled data based on the user intent,
+    you should return only the selectors that acheive the task, 
+    and ignore the rest
     Always respond using the following schema:
     ${BrowserTaskSchemaParser.getFormatInstructions()}
   `,
