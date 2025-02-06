@@ -50,28 +50,33 @@ LANGSMITH_PROJECT="your-lang-smith-project-name"
 
 
 SEARCH_DEPTH =basic
-SEARCH_RESULTS
+SEARCH_RESULTS=2
 ```
 
 - dev options: are for integrating with langsmith for development purposes.
 - `SEARCH_RESULTS` : Will determine the number of results per search query.
 - `SEARCH_DEPTH` : basic or deep
 
-Note: both crawl, and browser needs to start the prompt with "
-describe this high level task : <yourprompt>"
-other wise AI will try to execute it , when it's executed by a tool node.
+Note: researcher may get stuck in asking clearifying questions, you can always ask him to report the research.
 
 ## Usage
+
+```bash
+git clone https://github.com/araldhafeeri/webpilot
+cd webpilot
+npm install
+npx playwright install chromium
+```
 
 ```bash
 npm run start
 ```
 
+then you can enter a thread by typing ( /research or /crawl or /browse) then enter, you can switch thread at any time.
+
 ## Contributing
 
-1. Fork the repository
-2. Create feature branch
-3. Submit PR with detailed description
+Contribution clossed.
 
 ## License
 
