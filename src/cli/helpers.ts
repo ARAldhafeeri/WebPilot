@@ -10,7 +10,13 @@ import { graph } from "../graph/index"; // Adjust path as needed
 import { APP_MODES, setModeFromMemoryStore } from "../config/modes";
 import { resetChatState } from "./state";
 
-const COMMANDS = ["/research", "/crawl", "/browse", "/exit"];
+export const COMMANDS = [
+  "/research",
+  "/crawl",
+  "/browse",
+  "/exit",
+  "/crawl/reset",
+];
 export const workflows = {
   research: "/research",
   crawl: "/crawl",
@@ -18,6 +24,7 @@ export const workflows = {
   noCommad: "noCommad",
   chat: "chat",
   exit: "/exit",
+  crawlReset: "/crawl/reset",
 };
 // Clear the current line and output a new message.
 export function console_out(msg: string) {
@@ -112,6 +119,14 @@ export async function onUserInput(userInput: string) {
 
       return workflows.crawl;
     }
+    case workflows.crawlReset:
+      const { depth, base, url } = await getCrawlParams(rl);
+      resetChatState("crawl", graph.crawl);
+      state.crawlParams = { depth, base, url };
+      await setModeFromMemoryStore(APP_MODES.crawl);
+      setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
+
+      return workflows.crawl;
 
     case workflows.browse:
       resetChatState("browse", graph.browse);
@@ -126,7 +141,9 @@ export async function onUserInput(userInput: string) {
       // if the user in a thread with the a.i continue
       if (!COMMANDS.includes(command) && state.title === "Default Chat") {
         console_out(
-          chalk.red("please select chat type: /research, /crawl, /browse")
+          chalk.red(
+            `please select chat type: ${COMMANDS.join(", ")} then Enter`
+          )
         );
         rl.setPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
         rl.prompt(true);

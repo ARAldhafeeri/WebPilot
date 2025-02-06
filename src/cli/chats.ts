@@ -11,10 +11,9 @@ export async function onCrawlChat(userMessage: string) {
   // crawl chat logic
   const { depth, base, url } = state.crawlParams;
   const data = await crawlTool(depth, url, base);
-  const stringData = JSON.stringify(data);
   state.chatHistory.push(
     new HumanMessage({
-      content: `CRAWL RESULTS: ${stringData} \n\nUSER QUESTION: ${userMessage}`,
+      content: `CRAWL RESULTS: ${data} \n\nUSER QUESTION: ${userMessage}`,
     })
   );
 }

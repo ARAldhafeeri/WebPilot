@@ -1,128 +1,121 @@
-import { INTERACTABLE_ELEMENTS } from "../config/selector";
-import { ISelector } from "../types/selector";
 import { Page } from "playwright";
 
-class Selector implements ISelector {
+export const INTERACTABLE_ELEMENTS = [
+  "a[href]",
+  "button",
+  'input:not([type="hidden"])',
+  "select",
+  "textarea",
+  '[tabindex]:not([tabindex="-1"])',
+  '[role="button"]',
+  '[role="link"]',
+  '[contenteditable="true"]',
+];
+
+class Selector {
   async getInteractableElements(page: Page) {
-    const elements = await page.evaluate(() =>
-      document.querySelectorAll(
-        [
-          "a[href]",
-          "button",
-          'input:not([type="hidden"])',
-          "select",
-          "textarea",
-          '[tabindex]:not([tabindex="-1"])',
-          '[role="button"]',
-          '[role="link"]',
-          '[contenteditable="true"]',
-        ].join(",")
-      )
-    );
+    const locator = page.locator(INTERACTABLE_ELEMENTS.join(","));
+    const elementLocators = await locator.all();
+    const elementDescriptions = [];
 
-    const interactableElements = Array.from(elements);
+    for (const elementLocator of elementLocators) {
+      let selector = null;
+      let text = null;
+      let tagName = null;
+      let canPush = false;
+      try {
+        selector = await this.getSelector(elementLocator);
+        text = await elementLocator.evaluate((el) =>
+          (el.textContent || el.getAttribute("aria-label") || "").trim()
+        );
+        tagName = await elementLocator.evaluate((el) =>
+          el.tagName.toLowerCase()
+        );
+        canPush = true;
+      } catch {
+        canPush = false;
+      }
+      if (canPush) {
+        elementDescriptions.push({ selector, text, tagName });
+      }
+    }
 
-    // Generate element descriptions
-    const elementDescriptions = interactableElements.map(async (element) => {
-      return {
-        selector: await this.getSelector(element, page),
-        text: this.getElementText(element),
-        tagName: element.tagName.toLowerCase(),
-      };
+    return elementDescriptions;
+  }
+
+  async getSelector(elementLocator: any) {
+    return elementLocator.evaluate((element: HTMLElement) => {
+      const escape = (str: string) => CSS.escape(str);
+
+      function getChildSelector(el: HTMLElement, parent: HTMLElement) {
+        const tag = el.tagName.toLowerCase();
+        const index =
+          Array.from(parent.children)
+            .filter((child) => child.tagName === el.tagName)
+            .indexOf(el) + 1;
+
+        if (el.className) {
+          const classes = el.className.split(/\s+/).filter((c) => c.length);
+          return `${tag}.${escape(classes[0])}`;
+        }
+
+        return index > 1 ? `${tag}:nth-child(${index})` : tag;
+      }
+
+      function getFallbackSelector(el: any) {
+        const path = [];
+        let current = el;
+
+        while (
+          current &&
+          current.nodeType === Node.ELEMENT_NODE &&
+          path.length < 3
+        ) {
+          let selector = current.tagName.toLowerCase();
+          if (current.className) {
+            const classes = current.className
+              .split(/\s+/)
+              .filter((c: string) => c.length);
+            if (classes.length) selector += `.${escape(classes[0])}`;
+          }
+          path.unshift(selector);
+          current = current.parentElement;
+        }
+        return path.join(" > ");
+      }
+
+      if (element.id) return `#${escape(element.id)}`;
+
+      if (element.className) {
+        const classes = element.className.split(/\s+/).filter((c) => c.length);
+        for (const cls of classes) {
+          const selector = `${element.tagName.toLowerCase()}.${escape(cls)}`;
+          if (document.querySelectorAll(selector).length === 1) return selector;
+        }
+      }
+
+      const name = element.getAttribute("name");
+      if (name) {
+        const selector = `${element.tagName.toLowerCase()}[name="${escape(
+          name
+        )}"]`;
+        if (document.querySelectorAll(selector).length === 1) return selector;
+      }
+
+      const parentWithId: HTMLElement = element.closest(
+        "[id]"
+      ) as unknown as HTMLElement;
+      if (parentWithId) {
+        const childSelector = getChildSelector(element, parentWithId);
+        return `#${escape(parentWithId.id)} ${childSelector}`;
+      }
+
+      const tagSelector = element.tagName.toLowerCase();
+      if (document.querySelectorAll(tagSelector).length === 1)
+        return tagSelector;
+
+      return getFallbackSelector(element);
     });
-    return Promise.all(elementDescriptions);
-  }
-
-  getElementText(element: Element) {
-    return (
-      element.textContent || element.getAttribute("aria-label")?.trim() || ""
-    );
-  }
-
-  async getSelector(element: Element, page: Page) {
-    // Helper function to escape CSS identifiers
-    const escape = (str: string) => CSS.escape(str);
-
-    // Quick return for elements with ID (with escaping)
-    if (element.id) return `#${escape(element.id)}`;
-
-    // Try to find a unique class combination (with escaping)
-    if (element.className) {
-      const classes = element.className.split(/\s+/).filter((c) => c.length);
-      for (const cls of classes) {
-        const escapedClass = escape(cls);
-        const selector = `${element.tagName.toLowerCase()}.${escapedClass}`;
-        if (await this.isUnique(selector, page)) return selector;
-      }
-    }
-
-    // Check for name attribute (with escaping)
-    const name = element.getAttribute("name");
-    if (name) {
-      const selector = `${element.tagName.toLowerCase()}[name="${escape(
-        name
-      )}"]`;
-      if (await this.isUnique(selector, page)) return selector;
-    }
-
-    // Look for parent container with ID (with escaping)
-    const parentWithId = element.closest("[id]");
-    if (parentWithId) {
-      const childSelector = this.getChildSelector(element, parentWithId);
-      const selector = `#${escape(parentWithId.id)} ${childSelector}`;
-      if (await this.isUnique(selector, page)) return selector;
-    }
-
-    // Check for unique tag name
-    const tagSelector = element.tagName.toLowerCase();
-    if (await this.isUnique(tagSelector, page)) return tagSelector;
-
-    // Fallback to simplified hierarchy
-    return this.getFallbackSelector(element);
-  }
-
-  getChildSelector(element: Element, parent: Element): string {
-    const tag = element.tagName.toLowerCase();
-    const index =
-      Array.from(parent.children)
-        .filter((child) => child.tagName === element.tagName)
-        .indexOf(element) + 1;
-
-    if (element.className) {
-      const classes = element.className.split(/\s+/).filter((c) => c.length);
-      return `${tag}.${CSS.escape(classes[0])}`;
-    }
-
-    return index > 1 ? `${tag}:nth-child(${index})` : tag;
-  }
-
-  getFallbackSelector(element: Element): string {
-    const path = [];
-    let current: Element | null = element;
-
-    while (
-      current &&
-      current.nodeType === Node.ELEMENT_NODE &&
-      path.length < 3
-    ) {
-      let selector = current.tagName.toLowerCase();
-
-      if (current.className) {
-        const classes = current.className.split(/\s+/).filter((c) => c.length);
-        if (classes.length) selector += `.${CSS.escape(classes[0])}`;
-      }
-
-      path.unshift(selector);
-      current = current.parentElement;
-    }
-
-    return path.join(" > ");
-  }
-
-  async isUnique(selector: any, page: Page) {
-    return page.evaluate(
-      () => document.querySelectorAll(selector).length === 1
-    );
   }
 }
 

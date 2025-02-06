@@ -8,6 +8,7 @@ import {
   isResearchThread,
   onUserInput,
   workflows,
+  COMMANDS,
 } from "./helpers";
 import {
   onCrawlChat,
@@ -26,7 +27,9 @@ export async function chatLoop() {
   console_out(chalk.magenta(`Current Mode: ${state.title}`));
   console_out(
     chalk.magenta(
-      `Type your message or use commands (/research, /crawl, /browse, /exit):\n`
+      `Type your message or use commands ${COMMANDS.join(
+        ", "
+      )} to switch chat type:\n`
     )
   );
 
