@@ -7,6 +7,7 @@ import {
   searchToolNode,
 } from "../nodes";
 import { NODE_NAMES } from "../../config/names";
+import { API_KEY } from "../../getEnv";
 
 const researcherNodeName = NODE_NAMES.hlResearchTasker;
 
@@ -21,9 +22,23 @@ const researchWorkflow = new StateGraph(AppState)
     end: NODE_NAMES.reporter,
     call_tool: "call_tool",
   })
-  // Instead of directly moving from reporter to END,
-  // add a conditional edge that checks if the reporter output is empty.
+
   .addConditionalEdges(
+    "call_tool",
+    // Each agent node updates the 'sender' field
+    // the tool calling node does not, meaning
+    // this edge will route back to the original agent
+    // who invoked the tool
+    (x) => x.sender,
+    {
+      [researcherNodeName]: NODE_NAMES.hlResearchTasker,
+    }
+  );
+
+// this is temp workaround
+// when using llama, the response is empty for some reason!
+if (API_KEY == "ollama") {
+  researchWorkflow.addConditionalEdges(
     NODE_NAMES.reporter,
     (state) => {
       // Get the most recent message from state
@@ -42,18 +57,8 @@ const researchWorkflow = new StateGraph(AppState)
       empty: NODE_NAMES.reporter, // Loop back to reporter if output is empty
       non_empty: END, // Otherwise, finish the workflow
     }
-  )
-
-  .addConditionalEdges(
-    "call_tool",
-    // Each agent node updates the 'sender' field
-    // the tool calling node does not, meaning
-    // this edge will route back to the original agent
-    // who invoked the tool
-    (x) => x.sender,
-    {
-      [researcherNodeName]: NODE_NAMES.hlResearchTasker,
-    }
   );
-
+} else {
+  researchWorkflow.addEdge(NODE_NAMES.reporter, END);
+}
 export default researchWorkflow;

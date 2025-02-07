@@ -1,9 +1,11 @@
 # WebPilot
 
 An multi-agent prompt to browser automation , research or crawling the web.
+
 ## Demo
 
 <a href="https://www.youtube.com/embed/iS45GgGmSZA?si=P_QXYnswkKbRJ5qI"> Demo video </a>
+
 ## Features
 
 - Natural language task processing
@@ -23,27 +25,71 @@ An multi-agent prompt to browser automation , research or crawling the web.
 
 ### Use the tool for free:
 
-note the only thing work well with llama3.1 is the researcher and crawler, the browser, minimal model is chatgpt-4-mini.
+Here’s a polished version with better readability and clarity:
 
-1.download ollama 2. run
+---
 
+### **Running DeepSeek R1 on Your Machine**
+
+For optimal results, choose the best model that your hardware can handle:  
+➡️ **[MFdoom DeepSeek R1](https://ollama.com/MFDoom/deepseek-r1-tool-calling)**
+
+---
+
+### **Hardware Requirements**
+
+Below is a table outlining the approximate hardware requirements for running different model sizes using **Ollama** and similar inference setups.
+
+| Model Size | VRAM (GPU) Required         | RAM (CPU) Required | Best Inference Method              |
+| ---------- | --------------------------- | ------------------ | ---------------------------------- |
+| **1.5B**   | **2GB+**                    | **4GB+**           | GPU or CPU                         |
+| **7B**     | **10-12GB+**                | **16GB+**          | GPU (Best) / CPU (Possible)        |
+| **8B**     | **12GB+**                   | **16-24GB+**       | GPU (Tight) / CPU (Better)         |
+| **14B**    | **24GB+**                   | **32GB+**          | CPU (4-bit) / GPU (A100+)          |
+| **32B**    | **48GB+**                   | **64GB+**          | CPU (Not ideal) / GPU (H100)       |
+| **70B**    | **80GB+**                   | **128GB+**         | High-end GPU (A100 80GB)           |
+| **671B**   | **Multi-GPU (TBs of VRAM)** | **1TB+ RAM**       | Not feasible for consumer hardware |
+
+---
+
+### **Setup Instructions**
+
+#### **1. Get a Tavily API Key**
+
+Sign up and generate your API key here:  
+➡️ **[Tavily API Key](https://app.tavily.com/home)**
+
+#### **2. Install and Run Ollama**
+
+Download and install Ollama, then pull the model:
+
+```sh
+ollama pull MFDoom/deepseek-r1-tool-calling:14B
 ```
-ollama pull llama3.1
-```
 
-3. get api key
+#### **3. Set Environment Variables**
 
-set env variables like this :
+Configure your environment with the necessary keys and settings:
 
-```
+```sh
 API_KEY="ollama"
-MODEL_SLUG="llama3.1"
-PROVIDER_BASE_URL=http://localhost:11434/v1
+MODEL_SLUG="MFDoom/deepseek-r1-tool-calling:14B"
+PROVIDER_BASE_URL="http://localhost:11434/v1"
+
+TAVILY_API_KEY="tvly-xxx"
+SEARCH_RESULTS="3"
+SEARCH_DEPTH="deep"
 ```
 
-npm start, and enjoy !
+#### **4. Start the Application**
 
-Works great with GhatGPT4-mini, better with reasoning models like o1-mini, o3-mini
+Run your application with:
+
+```sh
+npm start
+```
+
+✅ **You're all set! Enjoy running DeepSeek R1 on your machine.** 🚀
 
 ## Installation
 
