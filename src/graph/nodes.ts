@@ -10,7 +10,11 @@ import {
 import { llTaskerAgent } from "../agents/lltasker";
 
 import { NODE_NAMES } from "../config/names";
-import { reportAgent } from "../agents/reporter";
+import {
+  crawlReportAgent,
+  browseReportAgent,
+  searchReportAgent,
+} from "../agents/reporter";
 import { researcherQuestionTool, searchTool } from "../tools/search";
 import { crawlTool } from "../tools/crawl";
 import { executorTool } from "../tools/executor";
@@ -64,18 +68,41 @@ export async function lowLevelTasksNode(
   });
 }
 
-export async function reportNode(
+export async function reportResearchNode(
   state: typeof AppState.State,
   config?: RunnableConfig
 ) {
   return runAgentNode({
     state: state,
-    agent: reportAgent,
+    agent: searchReportAgent,
     name: NODE_NAMES.reporter,
     config,
   });
 }
 
+export async function reportCrawlhNode(
+  state: typeof AppState.State,
+  config?: RunnableConfig
+) {
+  return runAgentNode({
+    state: state,
+    agent: crawlReportAgent,
+    name: NODE_NAMES.reporter,
+    config,
+  });
+}
+
+export async function reportBrowseNode(
+  state: typeof AppState.State,
+  config?: RunnableConfig
+) {
+  return runAgentNode({
+    state: state,
+    agent: browseReportAgent,
+    name: NODE_NAMES.reporter,
+    config,
+  });
+}
 export const searchToolNode = new ToolNode([
   searchTool,
   researcherQuestionTool,

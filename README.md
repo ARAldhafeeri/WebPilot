@@ -17,6 +17,29 @@ An multi-agent prompt to browser automation , research or crawling the web.
 ## Supported platforms
 
 - OpenAI ( <a href="openai.com" >openai</a> )
+- Ollama ( llama3.1)
+
+### Use the tool for free:
+
+note the only thing work well with llama3.1 is the researcher and crawler, the browser, minimal model is chatgpt-4-mini.
+
+1.download ollama 2. run
+
+```
+ollama pull llama3.1
+```
+
+3. get api key
+
+set env variables like this :
+
+```
+API_KEY="ollama"
+MODEL_SLUG="llama3.1"
+PROVIDER_BASE_URL=http://localhost:11434/v1
+```
+
+npm start, and enjoy !
 
 Works great with GhatGPT4-mini, better with reasoning models like o1-mini, o3-mini
 

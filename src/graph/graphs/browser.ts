@@ -5,14 +5,14 @@ import {
   executeToolNode,
   hlBrowserTaskerNode,
   lowLevelTasksNode,
-  reportNode,
+  reportBrowseNode,
 } from "../nodes";
 import { NODE_NAMES } from "../../config/names";
 
 const browseWorkflow = new StateGraph(AppState)
   .addNode(NODE_NAMES.lltasker, lowLevelTasksNode)
   // .addNode(NODE_NAMES.executorTool, executeToolNode)
-  .addNode(NODE_NAMES.reporter, reportNode);
+  .addNode(NODE_NAMES.reporter, reportBrowseNode);
 
 browseWorkflow
   .addEdge(START, NODE_NAMES.lltasker)

@@ -97,8 +97,12 @@ export async function onChatResponse() {
 
   let fullResponse = "";
   for await (const chunk of stream) {
-    fullResponse += await messageContent(chunk);
+    const chunkMessage = await messageContent(chunk);
+    if (Boolean(chunkMessage)) {
+      fullResponse += chunkMessage;
+    }
   }
+
   // ai message handled in onAiResearchQuestion
   if (!state.isAiQuestion && Boolean(fullResponse)) {
     state.chatHistory.push(new AIMessage({ content: fullResponse }));

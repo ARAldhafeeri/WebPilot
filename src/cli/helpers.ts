@@ -86,6 +86,7 @@ export async function messageContent(output: Record<string, any>) {
 
   if ("messages" in firstItem && Array.isArray(firstItem.messages)) {
     const lastMessage = firstItem.messages[firstItem.messages.length - 1];
+
     // Adjust the sender check as needed (here using a literal 'reporter')
     if ("sender" in firstItem && firstItem["sender"] === NODE_NAMES.reporter) {
       if (lastMessage.content) {
@@ -134,7 +135,7 @@ export async function onUserInput(userInput: string) {
       setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
       return workflows.research;
 
-    case workflows.crawl: {
+    case workflows.crawl || workflows.crawlReset: {
       resetChatState("crawl", graph.crawl);
       state.crawlParams = await getCrawlParams(rl);
       await setModeFromMemoryStore(APP_MODES.crawl);
@@ -142,26 +143,14 @@ export async function onUserInput(userInput: string) {
 
       return workflows.crawl;
     }
-    case workflows.crawlReset:
-      resetChatState("crawl", graph.crawl);
-      state.crawlParams = await getCrawlParams(rl);
-      await setModeFromMemoryStore(APP_MODES.crawl);
-      setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
 
-      return workflows.crawl;
-
-    case workflows.browse:
+    case workflows.browse || workflows.browseReset:
       resetChatState("browse", graph.browse);
       state.browseParams = await getBrowseParams(rl);
       await setModeFromMemoryStore(APP_MODES.browse);
       setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
       return workflows.browse;
-    case workflows.browseReset:
-      resetChatState("browse", graph.browse);
-      state.browseParams = await getBrowseParams(rl);
-      await setModeFromMemoryStore(APP_MODES.browse);
-      setCliPrompt(chalk.hex("#ff9900")(`🌀 [${state.title}]> `));
-      return workflows.browse;
+
     // user in chat
     default:
       // If input is not a recognized command and the

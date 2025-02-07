@@ -17,7 +17,6 @@ export const executorTool = tool(
       } catch (error) {
         clearInterval(checkBrowserClosed);
         await browser.close();
-        console.log("Browser closed by user.");
       }
     }, 2000);
     for (const step of State.currentTask.steps) {
@@ -91,7 +90,6 @@ export async function runExecutorTask(task: Task) {
       clearInterval(checkBrowserClosed);
       await browserInstance?.close();
       browserInstance = null;
-      console.log("Browser closed by user.");
     }
   }, 2000);
 
