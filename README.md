@@ -11,15 +11,14 @@ An multi-agent prompt to browser automation , research or crawling the web.
 ## Prerequisites
 
 - Node.js v20+
-- API key (OpenAI or any other modal via openrouter)
+- API key (OpenAI)
 - API key for trivaly ( for researcher )
 
 ## Supported platforms
 
 - OpenAI ( <a href="openai.com" >openai</a> )
-- Otehrs ( <a href="openrouter.ai">openrouter</a>)
 
-Works great with GhatGPT4-mini, better with reasoning models like o1-mini, o3-mini, r1 (deepseek)
+Works great with GhatGPT4-mini, better with reasoning models like o1-mini, o3-mini
 
 ## Installation
 
