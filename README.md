@@ -1,7 +1,9 @@
 # WebPilot
 
 An multi-agent prompt to browser automation , research or crawling the web.
+## Demo
 
+<a href="https://www.youtube.com/embed/iS45GgGmSZA?si=P_QXYnswkKbRJ5qI"> Demo video </a>
 ## Features
 
 - Natural language task processing
