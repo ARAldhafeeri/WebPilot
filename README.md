@@ -25,8 +25,6 @@ An multi-agent prompt to browser automation , research or crawling the web.
 
 ### Use the tool for free:
 
-Here’s a polished version with better readability and clarity:
-
 ---
 
 ### **Running DeepSeek R1 on Your Machine**
